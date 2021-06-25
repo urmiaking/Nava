@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Nava.WebFramework\Nava.WebFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\album_avatars\" />
+    <Folder Include="wwwroot\artists_avatars\" />
+    <Folder Include="wwwroot\media_avatars\" />
+    <Folder Include="wwwroot\media_files\" />
+    <Folder Include="wwwroot\user_avatars\" />
+  </ItemGroup>
+
+</Project>
