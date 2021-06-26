@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Nava.Common;
 using Nava.Common.Exceptions;
 using Nava.Data.Contracts;
+using Nava.Entities.Media;
 using Nava.Entities.User;
 using Nava.Presentation.Models;
 using Nava.Services.Services;

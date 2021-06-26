@@ -7,14 +7,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Nava.Common;
 using Nava.Common.Exceptions;
 using Nava.Data.Contracts;
 using Nava.Entities.Media;
+using Nava.Entities.User;
 using Nava.Presentation.Models;
 using Nava.WebFramework.Api;
+using Role = Nava.Common.Role;
 
 namespace Nava.Presentation.Controllers
 {
@@ -25,11 +28,13 @@ namespace Nava.Presentation.Controllers
         private readonly string _mediaFilePath;
         private readonly IRepository<Media> _mediaRepository;
         private readonly IRepository<Album> _albumRepository;
-        public MediasController(IRepository<Media> repository, IMapper mapper, IFileRepository fileRepository, IRepository<Album> albumRepository)
+        private readonly IRepository<User> _userRepository;
+        public MediasController(IRepository<Media> repository, IMapper mapper, IFileRepository fileRepository, IRepository<Album> albumRepository, IRepository<User> userRepository)
             : base(repository, mapper)
         {
             _fileRepository = fileRepository;
             _albumRepository = albumRepository;
+            _userRepository = userRepository;
             _mediaRepository = repository;
             _mediaArtworkPath = "wwwroot\\media_avatars";
             _mediaFilePath = "wwwroot\\media_files";
@@ -134,7 +139,7 @@ namespace Nava.Presentation.Controllers
             return await base.Update(id, dto, cancellationToken);
         }
 
-        [HttpGet(nameof(GetMediaFile)+"/{id}")]
+        [HttpGet(nameof(GetMediaFile) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<FileContentResult> GetMediaFile(int id, CancellationToken cancellationToken)
         {
@@ -164,6 +169,110 @@ namespace Nava.Presentation.Controllers
 
             return File(await System.IO.File.ReadAllBytesAsync(path, cancellationToken),
                 contentType, $"{media.Title}{fileFormat}", true);
+        }
+
+        [HttpGet(nameof(Like) + "/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ApiResult> Like(int id, CancellationToken cancellationToken)
+        {
+            var media = await _mediaRepository.Table
+                .Include(a => a.LikedUsers)
+                .FirstOrDefaultAsync(a=>a.Id.Equals(id), cancellationToken);
+
+            if (media is null)
+                throw new NotFoundException("مدیا یافت نشد");
+
+            var username = User.Identity?.Name;
+            var likedUser = await _userRepository.Table
+                .FirstOrDefaultAsync(a => 
+                    a.UserName.Equals(username), cancellationToken);
+
+            if (likedUser is null)
+                throw new BadRequestException();
+
+            if (media.LikedUsers.Contains(likedUser))
+                throw new BadRequestException("این مدیا قبلا لایک شده است");
+
+            media.LikedUsers.Add(likedUser);
+
+            await _mediaRepository.UpdateAsync(media, cancellationToken);
+
+            return Ok();
+        }
+
+        [HttpGet(nameof(Dislike) + "/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ApiResult> Dislike(int id, CancellationToken cancellationToken)
+        {
+            var media = await _mediaRepository.Table
+                .Include(a => a.LikedUsers)
+                .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
+
+            if (media is null)
+                throw new NotFoundException("مدیا یافت نشد");
+
+            var username = User.Identity?.Name;
+            var likedUser = await _userRepository.Table
+                .FirstOrDefaultAsync(a =>
+                    a.UserName.Equals(username), cancellationToken);
+
+            if (likedUser is null)
+                throw new BadRequestException();
+
+            if (!media.LikedUsers.Contains(likedUser))
+                throw new BadHttpRequestException("این مدیا قبلا لایک نشده است");
+            
+            media.LikedUsers.Remove(likedUser);
+
+            await _mediaRepository.UpdateAsync(media, cancellationToken);
+
+            return Ok();
+        }
+
+        [HttpGet(nameof(Visit) + "/{id}")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        public async Task<ApiResult> Visit(int id, CancellationToken cancellationToken)
+        {
+            var media = await _mediaRepository.Table
+                .Include(a => a.VisitedUsers)
+                .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
+
+            if (media is null)
+                throw new NotFoundException("مدیا یافت نشد");
+
+            var username = User.Identity?.Name;
+            var visitedUser = await _userRepository.Table
+                .FirstOrDefaultAsync(a =>
+                    a.UserName.Equals(username), cancellationToken);
+
+            if (visitedUser is null)
+                throw new BadRequestException();
+
+            if (media.VisitedUsers.Contains(visitedUser))
+                return Ok();
+
+            media.VisitedUsers.Add(visitedUser);
+
+            await _mediaRepository.UpdateAsync(media, cancellationToken);
+
+            return Ok();
+        }
+
+        [HttpGet(nameof(GetLikedVisitedMedias) + "/{id}")]
+        [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
+        public async Task<ApiResult<List<MediaResultDto>>> GetLikedVisitedMedias(int id, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.TableNoTracking.Include(a => a.LikedMedias)
+                .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
+
+            if (user is null)
+                throw new NotFoundException();
+
+            var likedMedias = await _mediaRepository.TableNoTracking
+                .Where(a => a.LikedUsers.Contains(user) || a.VisitedUsers.Contains(user))
+                .ProjectTo<MediaResultDto>(Mapper.ConfigurationProvider).ToListAsync(cancellationToken);
+
+            return Ok(likedMedias);
         }
     }
 }
