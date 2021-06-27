@@ -16,12 +16,10 @@ using Nava.Presentation.Models;
 using Nava.WebFramework.Api;
 using Nava.WebFramework.Filters;
 
-namespace Nava.Presentation.Controllers
+namespace Nava.Presentation.Controllers.v1
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [ApiResultFilter]
-    public class LikesController : ControllerBase
+    [ApiVersion("1")]
+    public class LikesController : BaseController
     {
         private readonly IRepository<LikedMedia> _likedMediaRepository;
         private readonly IMapper _mapper;

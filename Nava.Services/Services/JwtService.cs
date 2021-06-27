@@ -26,7 +26,7 @@ namespace Nava.Services.Services
             _userManager = userManager;
             _siteSettings = settings.Value;
         }
-        public async Task<string> GenerateAsync(User user)
+        public async Task<AccessToken> GenerateAsync(User user)
         {
             var secretKey = Encoding.UTF8.GetBytes(_siteSettings.JwtSettings.SecretKey); // longer than 16 character
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256Signature);
@@ -56,11 +56,11 @@ namespace Nava.Services.Services
 
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var securityToken = tokenHandler.CreateToken(descriptor);
+            var securityToken = tokenHandler.CreateJwtSecurityToken(descriptor);
 
-            var jwt = tokenHandler.WriteToken(securityToken);
+            //var jwt = tokenHandler.WriteToken(securityToken);
 
-            return jwt;
+            return new AccessToken(securityToken);
         }
 
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)

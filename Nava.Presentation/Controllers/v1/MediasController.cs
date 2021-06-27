@@ -19,8 +19,9 @@ using Nava.Presentation.Models;
 using Nava.WebFramework.Api;
 using Role = Nava.Common.Role;
 
-namespace Nava.Presentation.Controllers
+namespace Nava.Presentation.Controllers.v1
 {
+    [ApiVersion("1")]
     public class MediasController : CrudController<MediaDto, MediaResultDto, MediaUpdateDto, Media, int>
     {
         private readonly IFileRepository _fileRepository;

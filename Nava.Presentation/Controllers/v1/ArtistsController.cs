@@ -18,8 +18,9 @@ using Nava.Presentation.Models;
 using Nava.WebFramework.Api;
 using Nava.WebFramework.Filters;
 
-namespace Nava.Presentation.Controllers
+namespace Nava.Presentation.Controllers.v1
 {
+    [ApiVersion("1")]
     public class ArtistsController : CrudController<ArtistDto, ArtistResultDto, ArtistUpdateDto, Artist, int>
     {
         private readonly IFileRepository _fileRepository;

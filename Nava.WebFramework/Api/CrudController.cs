@@ -12,7 +12,7 @@ using Nava.Data.Contracts;
 
 namespace Nava.WebFramework.Api
 {
-    //[ApiVersion("1")]
+    [ApiVersion("1")]
     public class CrudController<TDto, TResultDto, TUpdateDto, TEntity, TKey> : BaseController
         where TDto : BaseDto<TDto, TEntity, TKey>, new()
         where TUpdateDto : BaseDto<TUpdateDto, TEntity, TKey>, new()

@@ -16,12 +16,10 @@ using Nava.Presentation.Models;
 using Nava.WebFramework.Api;
 using Nava.WebFramework.Filters;
 
-namespace Nava.Presentation.Controllers
+namespace Nava.Presentation.Controllers.v1
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [ApiResultFilter]
-    public class FollowingsController : ControllerBase
+    [ApiVersion("1")]
+    public class FollowingsController : BaseController
     {
         private readonly IUserRepository _userRepository;
         private readonly IRepository<Artist> _artistRepository;

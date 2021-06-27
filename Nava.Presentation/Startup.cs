@@ -9,6 +9,7 @@ using Nava.Common;
 using Nava.WebFramework.Configuration;
 using Nava.WebFramework.CustomMapping;
 using Nava.WebFramework.Middlewares;
+using Nava.WebFramework.Swagger;
 
 namespace Nava.Presentation
 {
@@ -40,21 +41,7 @@ namespace Nava.Presentation
 
             services.AddCustomApiVersioning();
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Zomato API",
-                    Version = "v1",
-                    Description = "Description for the API goes here.",
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Ankush Jain",
-                        Email = string.Empty,
-                        Url = new Uri("https://coderjony.com/"),
-                    },
-                });
-            });
+            services.AddSwagger();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
@@ -79,18 +66,8 @@ namespace Nava.Presentation
             app.UseAuthentication();
             
             app.UseAuthorization();
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Zomato API V1");
-
-                // To serve SwaggerUI at application's root page, set the RoutePrefix property to an empty string.
-                c.RoutePrefix = string.Empty;
-            });
+            app.UseSwaggerAndUI();
 
             app.UseEndpoints(endpoints =>
             {

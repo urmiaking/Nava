@@ -23,12 +23,10 @@ using Nava.WebFramework.Api;
 using Nava.WebFramework.Filters;
 using Role = Nava.Common.Role;
 
-namespace Nava.Presentation.Controllers
+namespace Nava.Presentation.Controllers.v1
 {
-    [Route("api/[controller]")]
-    [ApiResultFilter]
-    [ApiController]
-    public class UserController : ControllerBase
+    [ApiVersion("1")]
+    public class UserController : BaseController
     {
         private readonly IUserRepository _userRepository;
         private readonly UserManager<User> _userManager;
@@ -121,21 +119,34 @@ namespace Nava.Presentation.Controllers
             return Ok(resultDto);
         }
 
-        [HttpGet("[action]")]
+        /// <summary>
+        /// This method generate JWT Token
+        /// </summary>
+        /// <param name="tokenRequest">The information of token request</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost("[action]")]
         [AllowAnonymous]
-        public async Task<string> Token(string username, string password, CancellationToken cancellationToken)
+        public virtual async Task<ActionResult> Token([FromForm] TokenRequest tokenRequest, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByNameAsync(username);
+            if (!tokenRequest.grant_type.Equals("password", StringComparison.OrdinalIgnoreCase))
+                throw new Exception("OAuth flow is not password.");
 
-            if (user is null)
-                throw new NotFoundException("نام کاربری وجود ندارد");
+            //var user = await userRepository.GetByUserAndPass(username, password, cancellationToken);
+            var user = await _userManager.FindByNameAsync(tokenRequest.username);
+            if (user == null)
+                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
-            var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+            var isPasswordValid = await _userManager.CheckPasswordAsync(user, tokenRequest.password);
+            if (!isPasswordValid)
+                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
-            if (!isPasswordValid) throw new BadRequestException("رمز عبور اشتباه است");
 
-            await _userManager.UpdateSecurityStampAsync(user);
-            return await _jwtService.GenerateAsync(user);
+            //if (user == null)
+            //    throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+
+            var jwt = await _jwtService.GenerateAsync(user);
+            return new JsonResult(jwt);
         }
 
         [HttpDelete("{id}")]

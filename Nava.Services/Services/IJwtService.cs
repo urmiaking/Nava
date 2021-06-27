@@ -6,6 +6,6 @@ namespace Nava.Services.Services
 {
     public interface IJwtService
     {
-        public Task<string> GenerateAsync(User user);
+        public Task<AccessToken> GenerateAsync(User user);
     }
 }
