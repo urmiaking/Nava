@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nava.Data;
 
 namespace Nava.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210626142529_RefactorVisitRelationship")]
+    partial class RefactorVisitRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +34,21 @@ namespace Nava.Data.Migrations
                     b.HasIndex("ArtistsId");
 
                     b.ToTable("AlbumArtists");
+                });
+
+            modelBuilder.Entity("ArtistUser", b =>
+                {
+                    b.Property<int>("FollowersId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FollowingArtistsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FollowersId", "FollowingArtistsId");
+
+                    b.HasIndex("FollowingArtistsId");
+
+                    b.ToTable("Followings");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -199,26 +216,6 @@ namespace Nava.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Artist");
-                });
-
-            modelBuilder.Entity("Nava.Entities.Media.Following", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ArtistId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("UserId", "ArtistId");
-
-                    b.HasIndex("ArtistId");
-
-                    b.ToTable("Following");
                 });
 
             modelBuilder.Entity("Nava.Entities.Media.LikedMedia", b =>
@@ -436,6 +433,21 @@ namespace Nava.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ArtistUser", b =>
+                {
+                    b.HasOne("Nava.Entities.User.User", null)
+                        .WithMany()
+                        .HasForeignKey("FollowersId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Nava.Entities.Media.Artist", null)
+                        .WithMany()
+                        .HasForeignKey("FollowingArtistsId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("Nava.Entities.User.Role", null)
@@ -485,25 +497,6 @@ namespace Nava.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Nava.Entities.Media.Following", b =>
-                {
-                    b.HasOne("Nava.Entities.Media.Artist", "Artist")
-                        .WithMany("Followers")
-                        .HasForeignKey("ArtistId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Nava.Entities.User.User", "User")
-                        .WithMany("FollowingArtists")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Artist");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Nava.Entities.Media.LikedMedia", b =>
@@ -560,11 +553,6 @@ namespace Nava.Data.Migrations
                     b.Navigation("Medias");
                 });
 
-            modelBuilder.Entity("Nava.Entities.Media.Artist", b =>
-                {
-                    b.Navigation("Followers");
-                });
-
             modelBuilder.Entity("Nava.Entities.Media.Media", b =>
                 {
                     b.Navigation("LikedUsers");
@@ -574,8 +562,6 @@ namespace Nava.Data.Migrations
 
             modelBuilder.Entity("Nava.Entities.User.User", b =>
                 {
-                    b.Navigation("FollowingArtists");
-
                     b.Navigation("LikedMedias");
 
                     b.Navigation("VisitedMedias");

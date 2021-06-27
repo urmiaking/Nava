@@ -8,6 +8,11 @@ namespace Nava.Entities.Media
 {
     public class Media : BaseEntity
     {
+        public Media()
+        {
+            LikedUsers = new List<LikedMedia>();
+            VisitedUsers = new List<VisitedMedia>();
+        }
         public string Title { get; set; }
         public MediaType Type { get; set; }
         public string FilePath { get; set; }
@@ -22,8 +27,8 @@ namespace Nava.Entities.Media
         public int AlbumId { get; set; }
         public virtual Album Album { get; set; }
 
-        public virtual ICollection<User.User> LikedUsers { get; set; }
-        public virtual ICollection<User.User> VisitedUsers { get; set; }
+        public virtual ICollection<LikedMedia> LikedUsers { get; set; }
+        public virtual ICollection<VisitedMedia> VisitedUsers { get; set; }
     }
 
     public enum MediaType

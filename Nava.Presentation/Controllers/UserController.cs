@@ -145,11 +145,11 @@ namespace Nava.Presentation.Controllers
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new BadRequestException();
+            if (authorizedUser is null) throw new UnauthorizedAccessException();
 
             if (authorizedUser.Id != id)
                 if(!User.IsInRole(Role.Admin))
-                    throw new BadRequestException("Restrict access.");
+                    throw new UnauthorizedAccessException("Restrict access.");
 
             var user = await _userRepository.GetByIdAsync(cancellationToken, id);
 
@@ -175,11 +175,11 @@ namespace Nava.Presentation.Controllers
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new BadRequestException();
+            if (authorizedUser is null) throw new UnauthorizedAccessException();
 
             if (authorizedUser.Id != id)
                 if (!User.IsInRole(Role.Admin))
-                    throw new BadRequestException("Restrict access.");
+                    throw new UnauthorizedAccessException("Restrict access.");
 
             dto.Id = id;
             

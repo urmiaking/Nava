@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Nava.Data;
 
 namespace Nava.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210626141645_RefactorLikeRelationship")]
+    partial class RefactorLikeRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +34,36 @@ namespace Nava.Data.Migrations
                     b.HasIndex("ArtistsId");
 
                     b.ToTable("AlbumArtists");
+                });
+
+            modelBuilder.Entity("ArtistUser", b =>
+                {
+                    b.Property<int>("FollowersId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FollowingArtistsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FollowersId", "FollowingArtistsId");
+
+                    b.HasIndex("FollowingArtistsId");
+
+                    b.ToTable("Followings");
+                });
+
+            modelBuilder.Entity("MediaUser", b =>
+                {
+                    b.Property<int>("VisitedMediasId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VisitedUsersId")
+                        .HasColumnType("int");
+
+                    b.HasKey("VisitedMediasId", "VisitedUsersId");
+
+                    b.HasIndex("VisitedUsersId");
+
+                    b.ToTable("Visits");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -201,26 +233,6 @@ namespace Nava.Data.Migrations
                     b.ToTable("Artist");
                 });
 
-            modelBuilder.Entity("Nava.Entities.Media.Following", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ArtistId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("UserId", "ArtistId");
-
-                    b.HasIndex("ArtistId");
-
-                    b.ToTable("Following");
-                });
-
             modelBuilder.Entity("Nava.Entities.Media.LikedMedia", b =>
                 {
                     b.Property<int>("UserId")
@@ -283,26 +295,6 @@ namespace Nava.Data.Migrations
                     b.HasIndex("AlbumId");
 
                     b.ToTable("Media");
-                });
-
-            modelBuilder.Entity("Nava.Entities.Media.VisitedMedia", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MediaId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.HasKey("UserId", "MediaId");
-
-                    b.HasIndex("MediaId");
-
-                    b.ToTable("VisitedMedia");
                 });
 
             modelBuilder.Entity("Nava.Entities.User.Role", b =>
@@ -436,6 +428,36 @@ namespace Nava.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ArtistUser", b =>
+                {
+                    b.HasOne("Nava.Entities.User.User", null)
+                        .WithMany()
+                        .HasForeignKey("FollowersId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Nava.Entities.Media.Artist", null)
+                        .WithMany()
+                        .HasForeignKey("FollowingArtistsId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MediaUser", b =>
+                {
+                    b.HasOne("Nava.Entities.Media.Media", null)
+                        .WithMany()
+                        .HasForeignKey("VisitedMediasId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Nava.Entities.User.User", null)
+                        .WithMany()
+                        .HasForeignKey("VisitedUsersId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("Nava.Entities.User.Role", null)
@@ -487,25 +509,6 @@ namespace Nava.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Nava.Entities.Media.Following", b =>
-                {
-                    b.HasOne("Nava.Entities.Media.Artist", "Artist")
-                        .WithMany("Followers")
-                        .HasForeignKey("ArtistId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Nava.Entities.User.User", "User")
-                        .WithMany("FollowingArtists")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Artist");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Nava.Entities.Media.LikedMedia", b =>
                 {
                     b.HasOne("Nava.Entities.Media.Media", "Media")
@@ -536,49 +539,19 @@ namespace Nava.Data.Migrations
                     b.Navigation("Album");
                 });
 
-            modelBuilder.Entity("Nava.Entities.Media.VisitedMedia", b =>
-                {
-                    b.HasOne("Nava.Entities.Media.Media", "Media")
-                        .WithMany("VisitedUsers")
-                        .HasForeignKey("MediaId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Nava.Entities.User.User", "User")
-                        .WithMany("VisitedMedias")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Media");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Nava.Entities.Media.Album", b =>
                 {
                     b.Navigation("Medias");
                 });
 
-            modelBuilder.Entity("Nava.Entities.Media.Artist", b =>
-                {
-                    b.Navigation("Followers");
-                });
-
             modelBuilder.Entity("Nava.Entities.Media.Media", b =>
                 {
                     b.Navigation("LikedUsers");
-
-                    b.Navigation("VisitedUsers");
                 });
 
             modelBuilder.Entity("Nava.Entities.User.User", b =>
                 {
-                    b.Navigation("FollowingArtists");
-
                     b.Navigation("LikedMedias");
-
-                    b.Navigation("VisitedMedias");
                 });
 #pragma warning restore 612, 618
         }

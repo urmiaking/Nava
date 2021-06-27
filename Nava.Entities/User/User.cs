@@ -15,6 +15,9 @@ namespace Nava.Entities.User
         public User()
         {
             IsActive = true;
+            FollowingArtists = new List<Following>();
+            LikedMedias = new List<LikedMedia>();
+            VisitedMedias = new List<VisitedMedia>();
         }
 
         public string FullName { get; set; }
@@ -22,9 +25,10 @@ namespace Nava.Entities.User
         public string Bio { get; set; }
         public bool IsActive { get; set; }
 
-        public virtual ICollection<Artist> FollowingArtists { get; set; }
-        public virtual ICollection<Media.Media> LikedMedias { get; set; }
-        public virtual ICollection<Media.Media> VisitedMedias { get; set; }
+        public virtual ICollection<Following> FollowingArtists { get; set; }
+
+        public virtual ICollection<LikedMedia> LikedMedias { get; set; }
+        public virtual ICollection<VisitedMedia> VisitedMedias { get; set; }
     }
 
     public class UserConfiguration : IEntityTypeConfiguration<User>
@@ -33,19 +37,6 @@ namespace Nava.Entities.User
         {
             builder.Property(user => user.UserName).IsRequired().HasMaxLength(20);
             builder.Property(user => user.FullName).IsRequired().HasMaxLength(100);
-
-            builder
-                .HasMany(user => user.FollowingArtists)
-                .WithMany(artist => artist.Followers)
-                .UsingEntity(a => a.ToTable("Followings"));
-            builder
-                .HasMany(user => user.LikedMedias)
-                .WithMany(media => media.LikedUsers)
-                .UsingEntity(a => a.ToTable("Likes"));
-            builder
-                .HasMany(user => user.VisitedMedias)
-                .WithMany(media => media.VisitedUsers)
-                .UsingEntity(a => a.ToTable("Visits"));
         }
     }
 }

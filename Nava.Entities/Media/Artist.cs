@@ -14,7 +14,7 @@ namespace Nava.Entities.Media
         public string Bio { get; set; }
 
         public virtual ICollection<Album> Albums { get; set; }
-        public virtual ICollection<User.User> Followers { get; set; }
+        public virtual ICollection<Following> Followers { get; set; }
     }
 
     public class ArtistConfiguration : IEntityTypeConfiguration<Artist>
