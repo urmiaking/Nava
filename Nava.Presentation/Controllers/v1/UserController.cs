@@ -165,7 +165,11 @@ namespace Nava.Presentation.Controllers.v1
                 if (!User.IsInRole(Role.Admin))
                     throw new UnauthorizedAccessException("Restrict access.");
 
-            var user = await _userRepository.GetByIdAsync(cancellationToken, id);
+            var user = await _userRepository.Table
+                .Include(a => a.LikedMedias)
+                .Include(a => a.FollowingArtists)
+                .Include(a => a.VisitedMedias)
+                .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (user is null)
                 throw new NotFoundException($"کاربری با شناسه {id} پیدا نشد.");
@@ -175,6 +179,11 @@ namespace Nava.Presentation.Controllers.v1
             if (rolesForUser.Any())
                 foreach (var role in rolesForUser.ToList())
                     await _userManager.RemoveFromRoleAsync(user, role);
+
+            user.LikedMedias = null;
+            user.VisitedMedias = null;
+            user.FollowingArtists = null;
+            await _userManager.UpdateAsync(user);
 
             await _userRepository.DeleteAsync(user, cancellationToken);
             _fileRepository.DeleteFile(Path.Combine(_userAvatarPath, user.AvatarPath ?? ""));

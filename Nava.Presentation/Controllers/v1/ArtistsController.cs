@@ -85,11 +85,20 @@ namespace Nava.Presentation.Controllers.v1
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public override async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {
-            var artist = await Repository.TableNoTracking.FirstOrDefaultAsync(a =>
+            var artist = await Repository.Table
+                .Include(a => a.Albums)
+                .Include(a => a.Followers)
+                .FirstOrDefaultAsync(a =>
                 a.Id.Equals(id), cancellationToken);
 
             if (artist is null)
                 throw new NotFoundException();
+
+            if (artist.Albums.Any())
+                throw new BadRequestException("آلبوم های هنرمند خالی نمی باشد.");
+
+            artist.Followers = null;
+            await Repository.UpdateAsync(artist, cancellationToken);
 
             _fileRepository.DeleteFile(Path.Combine(_artistsAvatarPath, artist.AvatarPath));
 

@@ -50,9 +50,18 @@ namespace Nava.Presentation.Controllers.v1
         public override async Task<ApiResult<MediaResultDto>> Create([FromForm] MediaDto dto, CancellationToken cancellationToken)
         {
             dto.Id = 0;
-            var relatedAlbum = await _albumRepository.GetByIdAsync(cancellationToken, dto.AlbumId);
+            var relatedAlbum = await _albumRepository.TableNoTracking
+                .Include(a => a.Medias)
+                .FirstOrDefaultAsync(a => 
+                    a.Id.Equals(dto.AlbumId), cancellationToken);
             if (relatedAlbum is null)
                 return BadRequest("آلبوم مدیا یافت نشد");
+
+            if (relatedAlbum.IsSingle && relatedAlbum.Medias.Any())
+                return BadRequest("این آلبوم تک مدیا بوده و امکان اضافه کردن مدیای دیگر به آن وجود ندارد");
+
+            if (relatedAlbum.IsComplete)
+                return BadRequest("وضعیت آلبوم تکیمل شده می باشد و امکان اضافه کردن مدیا به آن وجود ندارد");
 
             if (dto.ArtworkFile != null)
             {
