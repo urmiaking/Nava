@@ -137,6 +137,9 @@ namespace Nava.Presentation.Controllers.v1
             if (user == null)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
+            if (!user.IsActive)
+                return new ForbidResult();
+            
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, tokenRequest.password);
             if (!isPasswordValid)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
@@ -159,7 +162,7 @@ namespace Nava.Presentation.Controllers.v1
             if (authorizedUser is null) throw new UnauthorizedAccessException();
 
             if (authorizedUser.Id != id)
-                if(!User.IsInRole(Role.Admin))
+                if (!User.IsInRole(Role.Admin))
                     throw new UnauthorizedAccessException("Restrict access.");
 
             var user = await _userRepository.GetByIdAsync(cancellationToken, id);
@@ -172,7 +175,7 @@ namespace Nava.Presentation.Controllers.v1
             if (rolesForUser.Any())
                 foreach (var role in rolesForUser.ToList())
                     await _userManager.RemoveFromRoleAsync(user, role);
-            
+
             await _userRepository.DeleteAsync(user, cancellationToken);
             _fileRepository.DeleteFile(Path.Combine(_userAvatarPath, user.AvatarPath ?? ""));
 
@@ -193,7 +196,7 @@ namespace Nava.Presentation.Controllers.v1
                     throw new UnauthorizedAccessException("Restrict access.");
 
             dto.Id = id;
-            
+
             var user = await _userRepository.GetByIdAsync(cancellationToken, id);
 
             user = dto.ToEntity(_mapper, user);
@@ -224,6 +227,21 @@ namespace Nava.Presentation.Controllers.v1
                 .SingleOrDefaultAsync(p => p.Id.Equals(user.Id), cancellationToken);
 
             return resultDto;
+        }
+
+        [HttpGet(nameof(DeactivateUserAccount) + "/{userId}")]
+        [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
+        public async Task<ApiResult> DeactivateUserAccount(int userId, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetByIdAsync(cancellationToken, userId);
+
+            if (user is null)
+                throw new NotFoundException("کاربر یافت نشد");
+
+            user.IsActive = false;
+            await _userManager.UpdateAsync(user);
+
+            return Ok();
         }
     }
 }

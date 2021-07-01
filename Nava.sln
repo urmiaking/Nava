@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nava.Presentation", "Nava.Presentation\Nava.Presentation.csproj", "{FDDCF414-F287-4AC7-AB9D-72ACD84742EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nava.Presentation", "Nava.Presentation\Nava.Presentation.csproj", "{FDDCF414-F287-4AC7-AB9D-72ACD84742EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nava.Common", "Nava.Common\Nava.Common.csproj", "{30FF9606-512E-4ACC-A9DA-55B0DFBE64CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nava.Common", "Nava.Common\Nava.Common.csproj", "{30FF9606-512E-4ACC-A9DA-55B0DFBE64CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nava.Entities", "Nava.Entities\Nava.Entities.csproj", "{49BDB00C-B1FE-45DD-9095-2FF4B01BF608}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nava.Entities", "Nava.Entities\Nava.Entities.csproj", "{49BDB00C-B1FE-45DD-9095-2FF4B01BF608}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nava.Data", "Nava.Data\Nava.Data.csproj", "{C527A6CC-F41D-4643-A7FB-C7C86B638686}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nava.Data", "Nava.Data\Nava.Data.csproj", "{C527A6CC-F41D-4643-A7FB-C7C86B638686}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nava.Services", "Nava.Services\Nava.Services.csproj", "{07D481E4-D9CE-4BCE-A855-3E386B2A09EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nava.Services", "Nava.Services\Nava.Services.csproj", "{07D481E4-D9CE-4BCE-A855-3E386B2A09EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nava.WebFramework", "Nava.WebFramework\Nava.WebFramework.csproj", "{64A63EDC-DFD0-4C55-826A-43237099C9B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nava.WebFramework", "Nava.WebFramework\Nava.WebFramework.csproj", "{64A63EDC-DFD0-4C55-826A-43237099C9B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

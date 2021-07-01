@@ -179,7 +179,7 @@ namespace Nava.WebFramework.Swagger
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
-                options.SwaggerEndpoint("/swagger/v2/swagger.json", "V2 Docs");
+                //options.SwaggerEndpoint("/swagger/v2/swagger.json", "V2 Docs");
 
                 #region Customizing
                 //// Display

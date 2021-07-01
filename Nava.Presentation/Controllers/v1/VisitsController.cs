@@ -100,7 +100,9 @@ namespace Nava.Presentation.Controllers.v1
                 .Include(a => a.Media)
                 .ThenInclude(a => a.Album)
                 .ThenInclude(a => a.Artists)
-                .Where(a => a.UserId.Equals(user.Id)).ToListAsync(cancellationToken);
+                .Where(a => a.UserId.Equals(user.Id))
+                .OrderByDescending(a => a.TimeStamp)
+                .ToListAsync(cancellationToken);
 
             var visitedMediaList = visitedMedias.Select(visitedMedia => visitedMedia.Media).ToList();
 
@@ -124,6 +126,7 @@ namespace Nava.Presentation.Controllers.v1
             var visitedMedias = await _visitedMediaRepository.TableNoTracking
                 .Include(a => a.User)
                 .Where(a => a.MediaId.Equals(media.Id))
+                .OrderByDescending(a => a.TimeStamp)
                 .ToListAsync(cancellationToken);
 
             var visitedUsersList = visitedMedias.Select(visitedMedia => visitedMedia.User).ToList();

@@ -122,7 +122,9 @@ namespace Nava.Presentation.Controllers.v1
             var likedMedias = await _likedMediaRepository.TableNoTracking.Include(a => a.Media)
                 .ThenInclude(a => a.Album)
                 .ThenInclude(a => a.Artists)
-                .Where(a => a.UserId.Equals(user.Id)).ToListAsync(cancellationToken);
+                .Where(a => a.UserId.Equals(user.Id))
+                .OrderByDescending(a => a.TimeStamp)
+                .ToListAsync(cancellationToken);
 
             var likedMediaList = likedMedias.Select(likedMedia => likedMedia.Media).ToList();
 
@@ -146,6 +148,7 @@ namespace Nava.Presentation.Controllers.v1
             var likedMedias = await _likedMediaRepository.TableNoTracking
                 .Include(a => a.User)
                 .Where(a => a.MediaId.Equals(media.Id))
+                .OrderByDescending(a => a.TimeStamp)
                 .ToListAsync(cancellationToken);
 
             var likedUsersList = likedMedias.Select(likedMedia => likedMedia.User).ToList();
