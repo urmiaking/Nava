@@ -162,6 +162,12 @@ namespace Nava.Presentation.Controllers.v1
             return resultDto;
         }
 
+        /// <summary>
+        /// Get the actual Artwork File of an album by it's unique Id
+        /// </summary>
+        /// <param name="id">Album's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetArtworkFile) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<FileContentResult> GetArtworkFile(int id, CancellationToken cancellationToken)

@@ -34,6 +34,12 @@ namespace Nava.Presentation.Controllers.v1
             _visitedMediaRepository = visitedMediaRepository;
         }
 
+        /// <summary>
+        /// A method for visiting a media by it's unique Id for authenticated user
+        /// </summary>
+        /// <param name="id">User's Unique id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(Visit) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> Visit(int id, CancellationToken cancellationToken)
@@ -77,6 +83,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok();
         }
 
+        /// <summary>
+        /// Get Medias which has visited by a user with it's unique Id
+        /// </summary>
+        /// <param name="id">User's unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetVisitedMedias) + "/{id}")]
         [Authorize(Roles = Role.User + "," + Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<List<MediaResultDto>>> GetVisitedMedias(int id, CancellationToken cancellationToken)
@@ -112,6 +124,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok(mediaDtoList);
         }
 
+        /// <summary>
+        /// Get Users which visited a media by it's unique Id
+        /// </summary>
+        /// <param name="id">>Media's unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetVisitedUsers) + "/{id}")]
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<List<UserResultDto>>> GetVisitedUsers(int id, CancellationToken cancellationToken)

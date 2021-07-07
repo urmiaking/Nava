@@ -34,6 +34,12 @@ namespace Nava.Presentation.Controllers.v1
             _mediaRepository = mediaRepository;
         }
 
+        /// <summary>
+        /// Like a media with it's unique Id by an authorized user
+        /// </summary>
+        /// <param name="id">Media's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(Like) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> Like(int id, CancellationToken cancellationToken)
@@ -69,6 +75,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok();
         }
 
+        /// <summary>
+        /// Dislike a media with it's unique Id by an authorized user
+        /// </summary>
+        /// <param name="id">Media's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(Dislike) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> Dislike(int id, CancellationToken cancellationToken)
@@ -100,6 +112,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok();
         }
 
+        /// <summary>
+        /// Get medias which has been liked by a user with it's unique Id
+        /// </summary>
+        /// <param name="id">User's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetLikedMedias) + "/{id}")]
         [Authorize(Roles = Role.User + "," + Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<List<MediaResultDto>>> GetLikedMedias(int id, CancellationToken cancellationToken)
@@ -134,6 +152,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok(mediaDtoList);
         }
 
+        /// <summary>
+        /// Get Users which had liked a media with it's unique Id
+        /// </summary>
+        /// <param name="id">Media's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetLikedUsers) + "/{id}")]
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<List<UserResultDto>>> GetLikedUsers(int id, CancellationToken cancellationToken)

@@ -105,6 +105,12 @@ namespace Nava.Presentation.Controllers.v1
             return await base.Delete(id, cancellationToken);
         }
 
+        /// <summary>
+        /// Get the actual Avatar of an artist by it's unique Id
+        /// </summary>
+        /// <param name="id">Artist's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetArtistAvatar) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<FileContentResult> GetArtistAvatar(int id, CancellationToken cancellationToken)

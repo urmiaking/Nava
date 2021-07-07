@@ -34,6 +34,12 @@ namespace Nava.Presentation.Controllers.v1
             _mapper = mapper;
         }
 
+        /// <summary>
+        /// Follow an artist with it's unique Id by an authorized user
+        /// </summary>
+        /// <param name="artistId">Artist's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(Follow) + "/{artistId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> Follow(int artistId, CancellationToken cancellationToken)
@@ -70,6 +76,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok();
         }
 
+        /// <summary>
+        /// UnFollow an artist with it's unique Id by an authorized user
+        /// </summary>
+        /// <param name="artistId">Artist's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(UnFollow) + "/{artistId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> UnFollow(int artistId, CancellationToken cancellationToken)
@@ -100,6 +112,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok();
         }
 
+        /// <summary>
+        /// Get artists which the authorized user has followed them
+        /// </summary>
+        /// <param name="userId">User's unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetFollowings) + "/{userId}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<List<ArtistResultDto>>> GetFollowings(int userId, CancellationToken cancellationToken)
@@ -126,6 +144,12 @@ namespace Nava.Presentation.Controllers.v1
             return Ok(artistDtoList);
         }
 
+        /// <summary>
+        /// Get Followers of an artist by it's unique Id
+        /// </summary>
+        /// <param name="artistId">Artist's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetFollowers) + "/{artistId}")]
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<List<UserResultDto>>> GetFollowers(int artistId, CancellationToken cancellationToken)

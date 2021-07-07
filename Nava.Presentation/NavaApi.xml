@@ -4,11 +4,139 @@
         <name>Nava.Presentation</name>
     </assembly>
     <members>
+        <member name="M:Nava.Presentation.Controllers.v1.AlbumsController.GetArtworkFile(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get the actual Artwork File of an album by it's unique Id
+            </summary>
+            <param name="id">Album's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.ArtistsController.GetArtistAvatar(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get the actual Avatar of an artist by it's unique Id
+            </summary>
+            <param name="id">Artist's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.FollowingsController.Follow(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Follow an artist with it's unique Id by an authorized user
+            </summary>
+            <param name="artistId">Artist's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.FollowingsController.UnFollow(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            UnFollow an artist with it's unique Id by an authorized user
+            </summary>
+            <param name="artistId">Artist's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.FollowingsController.GetFollowings(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get artists which the authorized user has followed them
+            </summary>
+            <param name="userId">User's unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.FollowingsController.GetFollowers(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get Followers of an artist by it's unique Id
+            </summary>
+            <param name="artistId">Artist's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.LikesController.Like(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Like a media with it's unique Id by an authorized user
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.LikesController.Dislike(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Dislike a media with it's unique Id by an authorized user
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.LikesController.GetLikedMedias(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get medias which has been liked by a user with it's unique Id
+            </summary>
+            <param name="id">User's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.LikesController.GetLikedUsers(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get Users which had liked a media with it's unique Id
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.MediasController.GetMediaFile(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get the actual Media file by it's unique Id
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.MediasController.GetArtworkFile(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get the actual Artwork file of a media by it's unique Id
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
         <member name="M:Nava.Presentation.Controllers.v1.UserController.Token(Nava.Presentation.Models.TokenRequest,System.Threading.CancellationToken)">
             <summary>
             This method generate JWT Token
             </summary>
             <param name="tokenRequest">The information of token request</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.UserController.DeactivateUserAccount(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Deactivate a user's account by it's unique userId
+            </summary>
+            <param name="userId">User's unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.VisitsController.Visit(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            A method for visiting a media by it's unique Id for authenticated user
+            </summary>
+            <param name="id">User's Unique id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.VisitsController.GetVisitedMedias(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get Medias which has visited by a user with it's unique Id
+            </summary>
+            <param name="id">User's unique Id</param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v1.VisitsController.GetVisitedUsers(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Get Users which visited a media by it's unique Id
+            </summary>
+            <param name="id">>Media's unique Id</param>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>

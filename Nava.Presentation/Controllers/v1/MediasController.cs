@@ -148,6 +148,12 @@ namespace Nava.Presentation.Controllers.v1
             return await base.Update(id, dto, cancellationToken);
         }
 
+        /// <summary>
+        /// Get the actual Media file by it's unique Id
+        /// </summary>
+        /// <param name="id">Media's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetMediaFile) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<FileContentResult> GetMediaFile(int id, CancellationToken cancellationToken)
@@ -164,6 +170,12 @@ namespace Nava.Presentation.Controllers.v1
                 contentType, $"{media.Title}{fileFormat}", true);
         }
 
+        /// <summary>
+        /// Get the actual Artwork file of a media by it's unique Id
+        /// </summary>
+        /// <param name="id">Media's Unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(GetArtworkFile) + "/{id}")]
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<FileContentResult> GetArtworkFile(int id, CancellationToken cancellationToken)

@@ -144,10 +144,6 @@ namespace Nava.Presentation.Controllers.v1
             if (!isPasswordValid)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
-
-            //if (user == null)
-            //    throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
-
             var jwt = await _jwtService.GenerateAsync(user);
             return new JsonResult(jwt);
         }
@@ -238,6 +234,12 @@ namespace Nava.Presentation.Controllers.v1
             return resultDto;
         }
 
+        /// <summary>
+        /// Deactivate a user's account by it's unique userId
+        /// </summary>
+        /// <param name="userId">User's unique Id</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet(nameof(DeactivateUserAccount) + "/{userId}")]
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> DeactivateUserAccount(int userId, CancellationToken cancellationToken)
