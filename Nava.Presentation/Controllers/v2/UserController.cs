@@ -66,6 +66,9 @@ namespace Nava.Presentation.Controllers.v2
             if (!isPasswordValid)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
+            user.SecurityStamp = Guid.NewGuid().ToString();
+            await _mongoRepository.ReplaceOneAsync(user);
+
             var jwt = _jwtService.GenerateForMongo(user);
             return new JsonResult(jwt);
         }
@@ -166,7 +169,7 @@ namespace Nava.Presentation.Controllers.v2
                     _ => null
                 };
             }
-
+            user.SecurityStamp = Guid.NewGuid().ToString();
             await _mongoRepository.ReplaceOneAsync(user);
 
             return MongoUserResultDto.FromEntity(_mapper, user);

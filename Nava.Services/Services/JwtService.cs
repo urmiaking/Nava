@@ -114,7 +114,7 @@ namespace Nava.Services.Services
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                //new Claim(securityStampClaimType, user.SecurityStamp)
+                new Claim(securityStampClaimType, user.SecurityStamp)
             };
 
             list.AddRange(from role in user.Roles

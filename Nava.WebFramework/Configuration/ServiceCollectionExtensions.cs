@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Nava.Common;
@@ -24,6 +25,7 @@ using Nava.Common.Exceptions;
 using Nava.Common.Utilities;
 using Nava.Data;
 using Nava.Data.Contracts;
+using Nava.Data.Repositories;
 using Nava.Entities.User;
 
 namespace Nava.WebFramework.Configuration
@@ -132,6 +134,25 @@ namespace Nava.WebFramework.Configuration
 
                             var validatedUser = await signInManager.ValidateSecurityStampAsync(context.Principal);
                             if (validatedUser == null)
+                                context.Fail("Token security stamp is not valid.");
+
+                            if (!user.IsActive)
+                                context.Fail("User is not active.");
+                        }
+                        else
+                        {
+                            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                            if (claimsIdentity.Claims?.Any() != true)
+                                context.Fail("This token has no claims.");
+
+                            var mongoUserRepository = context.HttpContext.RequestServices.GetRequiredService<IMongoRepository<Entities.MongoDb.User>>();
+
+                            var securityStampInContext = context.Principal.FindFirstValue("AspNet.Identity.SecurityStamp");
+
+                            var userId = claimsIdentity.GetUserId<string>();
+                            var user = await mongoUserRepository.FindByIdAsync(userId);
+
+                            if (user.SecurityStamp != securityStampInContext)
                                 context.Fail("Token security stamp is not valid.");
 
                             if (!user.IsActive)

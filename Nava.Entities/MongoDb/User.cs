@@ -18,7 +18,7 @@ namespace Nava.Entities.MongoDb
         public string UserName { get; set; }
         public string PasswordHash { get; set; }
         public string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
-        public string SecurityStamp { get; set; }
+        public string SecurityStamp { get; set; } = Guid.NewGuid().ToString();
         public string FullName { get; set; }
         public string AvatarPath { get; set; }
         public string Bio { get; set; }
