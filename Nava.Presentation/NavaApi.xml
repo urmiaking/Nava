@@ -140,5 +140,26 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:Nava.Presentation.Controllers.v2.ArtistsController.GetArtistAvatar(System.String)">
+            <summary>
+            Get the actual Avatar of an artist by it's unique Id
+            </summary>
+            <param name="id">Artist's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.UserController.DeactivateUserAccount(System.String)">
+            <summary>
+            Deactivate a user's account by it's unique userId
+            </summary>
+            <param name="userId">User's unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.UserController.Token(Nava.Presentation.Models.TokenRequest)">
+            <summary>
+            This method generate JWT Token
+            </summary>
+            <param name="tokenRequest">The information of token request</param>
+            <returns></returns>
+        </member>
     </members>
 </doc>

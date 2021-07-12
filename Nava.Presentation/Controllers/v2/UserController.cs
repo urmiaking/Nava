@@ -42,12 +42,29 @@ namespace Nava.Presentation.Controllers.v2
             _jwtService = jwtService;
         }
 
-        /*[HttpGet(nameof(DeactivateUserAccount))]
-        public Task<ApiResult> DeactivateUserAccount(int userId, CancellationToken cancellationToken)
+        /// <summary>
+        /// Deactivate a user's account by it's unique userId
+        /// </summary>
+        /// <param name="userId">User's unique Id</param>
+        /// <returns></returns>
+        [HttpGet(nameof(DeactivateUserAccount) + "/{userId}")]
+        [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
+        public async Task<ApiResult> DeactivateUserAccount(string userId)
         {
-            throw new NotImplementedException();
-        }*/
+            var user = await _mongoRepository.FindByIdAsync(userId);
+            if (user is null)
+                throw new NotFoundException("کاربر یافت نشد");
 
+            user.IsActive = false;
+            await _mongoRepository.ReplaceOneAsync(user);
+            return Ok();
+        }
+
+        /// <summary>
+        /// This method generate JWT Token
+        /// </summary>
+        /// <param name="tokenRequest">The information of token request</param>
+        /// <returns></returns>
         [HttpPost("[action]")]
         [AllowAnonymous]
         public async Task<ActionResult> Token([FromForm] TokenRequest tokenRequest)
@@ -172,7 +189,7 @@ namespace Nava.Presentation.Controllers.v2
             user.SecurityStamp = Guid.NewGuid().ToString();
             await _mongoRepository.ReplaceOneAsync(user);
 
-            return MongoUserResultDto.FromEntity(_mapper, user);
+            return Ok(MongoUserResultDto.FromEntity(_mapper, user));
         }
 
         [HttpDelete("{id}")]
