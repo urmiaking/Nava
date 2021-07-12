@@ -17,6 +17,7 @@ namespace Nava.WebFramework.Configuration
         {
             // RegisterType > As > LifeTime
             containerBuilder.RegisterGeneric(typeof(Repository<>)).As(typeof(IRepository<>)).InstancePerLifetimeScope();
+            containerBuilder.RegisterGeneric(typeof(MongoRepository<>)).As(typeof(IMongoRepository<>)).InstancePerLifetimeScope();
             // Manual Registration:
             /*
                 services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

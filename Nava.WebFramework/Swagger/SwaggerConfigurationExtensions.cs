@@ -70,8 +70,8 @@ namespace Nava.WebFramework.Swagger
                 //options.IgnoreObsoleteActions();
                 //options.IgnoreObsoleteProperties();
 
-                options.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "API V1" });
-                //options.SwaggerDoc("v2", new OpenApiInfo { Version = "v2", Title = "API V2" });
+                options.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "API V1 - SQL Server Implementation" });
+                options.SwaggerDoc("v2", new OpenApiInfo { Version = "v2", Title = "API V2 - MongoDB Implementation" });
 
                 #region Filters
                 //Enable to use [SwaggerRequestExample] & [SwaggerResponseExample]
@@ -178,8 +178,8 @@ namespace Nava.WebFramework.Swagger
             //Swagger middleware for generate UI from swagger.json
             app.UseSwaggerUI(options =>
             {
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
-                //options.SwaggerEndpoint("/swagger/v2/swagger.json", "V2 Docs");
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs - SQL Server Implementation");
+                options.SwaggerEndpoint("/swagger/v2/swagger.json", "V2 Docs - MongoDB Implementation");
 
                 #region Customizing
                 //// Display

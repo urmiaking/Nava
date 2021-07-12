@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -115,7 +116,7 @@ namespace Nava.WebFramework.Configuration
 
                         //var securityStamp = claimsIdentity.FindFirstValue(new ClaimsIdentityOptions().SecurityStampClaimType);
                         //if (!securityStamp.HasValue())
-                           // context.Fail("This token has no security stamp");
+                        // context.Fail("This token has no security stamp");
 
                         //Find user and token from database and perform your custom validation
                         var userId = claimsIdentity.GetUserId<int>();
@@ -171,6 +172,15 @@ namespace Nava.WebFramework.Configuration
                 //options.ApiVersionReader = ApiVersionReader.Combine(new QueryStringApiVersionReader("api-version"), new UrlSegmentApiVersionReader())
                 // combine of [querystring] & [urlsegment]
             });
+        }
+
+        public static void ConfigMongoDb(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<MongoDbDatabaseSettings>(
+                configuration.GetSection(nameof(MongoDbDatabaseSettings)));
+
+            services.AddSingleton<IMongoDbDatabaseSettings>(sp =>
+                sp.GetRequiredService<IOptions<MongoDbDatabaseSettings>>().Value);
         }
     }
 }

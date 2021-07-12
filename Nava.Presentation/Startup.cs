@@ -35,6 +35,8 @@ namespace Nava.Presentation
 
             services.AddDbContext(Configuration);
 
+            services.ConfigMongoDb(Configuration);
+
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
 
             services.AddCustomIdentity(_siteSettings.IdentitySettings);

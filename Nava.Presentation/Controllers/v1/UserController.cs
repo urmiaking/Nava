@@ -53,7 +53,7 @@ namespace Nava.Presentation.Controllers.v1
 
         [HttpGet]
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
-        public async Task<ActionResult<List<UserResultDto>>> Get(CancellationToken cancellationToken)
+        public virtual async Task<ActionResult<List<UserResultDto>>> Get(CancellationToken cancellationToken)
         {
             var list = await _userRepository.TableNoTracking
                 .ProjectTo<UserResultDto>(_mapper.ConfigurationProvider)
@@ -64,7 +64,7 @@ namespace Nava.Presentation.Controllers.v1
 
         [HttpGet("{id:int}")]
         [Authorize(Roles = Role.User + "," + Role.Admin, AuthenticationSchemes = "Bearer")]
-        public async Task<ActionResult<User>> Get(int id, CancellationToken cancellationToken)
+        public virtual async Task<ActionResult<User>> Get(int id, CancellationToken cancellationToken)
         {
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
@@ -86,7 +86,7 @@ namespace Nava.Presentation.Controllers.v1
 
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ApiResult<UserResultDto>> Create([FromForm] UserDto userDto, CancellationToken cancellationToken)
+        public virtual async Task<ApiResult<UserResultDto>> Create([FromForm] UserDto userDto, CancellationToken cancellationToken)
         {
             userDto.Id = 0;
             var user = userDto.ToEntity(_mapper);
@@ -150,7 +150,7 @@ namespace Nava.Presentation.Controllers.v1
 
         [HttpDelete("{id}")]
         [Authorize(Roles = Role.User + "," + Role.Admin, AuthenticationSchemes = "Bearer")]
-        public async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
+        public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
@@ -189,7 +189,7 @@ namespace Nava.Presentation.Controllers.v1
 
         [HttpPut("{id}")]
         [Authorize(Roles = Role.User + "," + Role.Admin, AuthenticationSchemes = "Bearer")]
-        public async Task<ApiResult<UserResultDto>> Update(int id, [FromForm] UserUpdateDto dto, CancellationToken cancellationToken)
+        public virtual async Task<ApiResult<UserResultDto>> Update(int id, [FromForm] UserUpdateDto dto, CancellationToken cancellationToken)
         {
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
@@ -242,7 +242,7 @@ namespace Nava.Presentation.Controllers.v1
         /// <returns></returns>
         [HttpGet(nameof(DeactivateUserAccount) + "/{userId}")]
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
-        public async Task<ApiResult> DeactivateUserAccount(int userId, CancellationToken cancellationToken)
+        public virtual async Task<ApiResult> DeactivateUserAccount(int userId, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByIdAsync(cancellationToken, userId);
 
