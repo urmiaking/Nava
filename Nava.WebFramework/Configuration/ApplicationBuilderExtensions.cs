@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nava.Common.Utilities;
 using Nava.Data;
+using Nava.Data.Repositories;
+using Nava.Entities.MongoDb;
 using Nava.Services.DataInitializer;
 
 namespace Nava.WebFramework.Configuration

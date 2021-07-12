@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -100,37 +101,44 @@ namespace Nava.WebFramework.Configuration
                     },
                     OnTokenValidated = async context =>
                     {
-                        var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<User>>();
-                        var userRepository = context.HttpContext.RequestServices.GetRequiredService<IRepository<User>>();
+                        var url = context.Request.GetDisplayUrl();
 
-                        var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
-                        if (claimsIdentity.Claims?.Any() != true)
-                            context.Fail("This token has no claims.");
-
-                        var securityStamp = await signInManager.ValidateSecurityStampAsync(context.Principal);
-
-                        if (securityStamp == null)
+                        if (url.Contains("v1"))
                         {
-                            context.Fail("This token has no security stamp");
+                            var signInManager = context.HttpContext.RequestServices.GetRequiredService<SignInManager<User>>();
+                            var userRepository = context.HttpContext.RequestServices.GetRequiredService<IRepository<User>>();
+
+                            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                            if (claimsIdentity.Claims?.Any() != true)
+                                context.Fail("This token has no claims.");
+
+                            var securityStamp = await signInManager.ValidateSecurityStampAsync(context.Principal);
+
+                            if (securityStamp == null)
+                            {
+                                context.Fail("This token has no security stamp");
+                            }
+
+                            //var securityStamp = claimsIdentity.FindFirstValue(new ClaimsIdentityOptions().SecurityStampClaimType);
+                            //if (!securityStamp.HasValue())
+                            // context.Fail("This token has no security stamp");
+
+                            //Find user and token from database and perform your custom validation
+                            var userId = claimsIdentity.GetUserId<int>();
+                            var user = await userRepository.GetByIdAsync(context.HttpContext.RequestAborted, userId);
+
+                            //if (user.MySecurityStamp != Guid.Parse(securityStamp)) //TODO: Change to securityStamp
+                            //    context.Fail("Token security stamp is not valid.");
+
+                            var validatedUser = await signInManager.ValidateSecurityStampAsync(context.Principal);
+                            if (validatedUser == null)
+                                context.Fail("Token security stamp is not valid.");
+
+                            if (!user.IsActive)
+                                context.Fail("User is not active.");
                         }
 
-                        //var securityStamp = claimsIdentity.FindFirstValue(new ClaimsIdentityOptions().SecurityStampClaimType);
-                        //if (!securityStamp.HasValue())
-                        // context.Fail("This token has no security stamp");
-
-                        //Find user and token from database and perform your custom validation
-                        var userId = claimsIdentity.GetUserId<int>();
-                        var user = await userRepository.GetByIdAsync(context.HttpContext.RequestAborted, userId);
-
-                        //if (user.MySecurityStamp != Guid.Parse(securityStamp)) //TODO: Change to securityStamp
-                        //    context.Fail("Token security stamp is not valid.");
-
-                        var validatedUser = await signInManager.ValidateSecurityStampAsync(context.Principal);
-                        if (validatedUser == null)
-                            context.Fail("Token security stamp is not valid.");
-
-                        if (!user.IsActive)
-                            context.Fail("User is not active.");
+                        
                     },
                     OnChallenge = context =>
                     {

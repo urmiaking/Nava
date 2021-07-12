@@ -63,6 +63,34 @@ namespace Nava.Services.Services
             return new AccessToken(securityToken);
         }
 
+        public AccessToken GenerateForMongo(Entities.MongoDb.User user)
+        {
+            var secretKey = Encoding.UTF8.GetBytes(_siteSettings.JwtSettings.SecretKey);
+            var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256Signature);
+
+            var encryptionKey = Encoding.UTF8.GetBytes(_siteSettings.JwtSettings.EncryptKey);
+            var encryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(encryptionKey), SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            var claims = GetMongoClaims(user);
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = _siteSettings.JwtSettings.Issuer,
+                Audience = _siteSettings.JwtSettings.Audience,
+                IssuedAt = DateTime.Now,
+                NotBefore = DateTime.Now.AddMinutes(_siteSettings.JwtSettings.NotBeforeMinutes),
+                Expires = DateTime.Now.AddMinutes(_siteSettings.JwtSettings.ExpirationMinutes),
+                SigningCredentials = signingCredentials,
+                Subject = new ClaimsIdentity(claims),
+                EncryptingCredentials = encryptingCredentials
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var securityToken = tokenHandler.CreateJwtSecurityToken(descriptor);
+
+            return new AccessToken(securityToken);
+        }
+
         private async Task<IEnumerable<Claim>> GetClaimsAsync(User user)
         {
             var securityStampClaimType = new ClaimsIdentityOptions().SecurityStampClaimType;
@@ -70,7 +98,6 @@ namespace Nava.Services.Services
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber ?? "null"),
                 new Claim(securityStampClaimType, user.SecurityStamp)
             };
 
@@ -79,5 +106,22 @@ namespace Nava.Services.Services
 
             return list;
         }
+
+        private IEnumerable<Claim> GetMongoClaims(Entities.MongoDb.User user)
+        {
+            var securityStampClaimType = new ClaimsIdentityOptions().SecurityStampClaimType;
+            var list = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                //new Claim(securityStampClaimType, user.SecurityStamp)
+            };
+
+            list.AddRange(from role in user.Roles
+                select new Claim(ClaimTypes.Role, role));
+
+            return list;
+        }
+
     }
 }

@@ -7,5 +7,7 @@ namespace Nava.Services.Services
     public interface IJwtService
     {
         public Task<AccessToken> GenerateAsync(User user);
+
+        public AccessToken GenerateForMongo(Entities.MongoDb.User user);
     }
 }
