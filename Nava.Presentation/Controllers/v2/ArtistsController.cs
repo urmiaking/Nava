@@ -19,14 +19,14 @@ namespace Nava.Presentation.Controllers.v2
     [ApiVersion("2")]
     public class ArtistsController : BaseController
     {
-        private readonly IMongoRepository<Artist> _mongoRepository;
+        private readonly IMongoRepository<Artist> _artistRepository;
         private readonly IFileRepository _fileRepository;
         private readonly IMapper _mapper;
         private const string ArtistsAvatarPath = "wwwroot\\artists_avatars";
 
-        public ArtistsController(IMongoRepository<Artist> mongoRepository, IFileRepository fileRepository, IMapper mapper)
+        public ArtistsController(IMongoRepository<Artist> artistRepository, IFileRepository fileRepository, IMapper mapper)
         {
-            _mongoRepository = mongoRepository;
+            _artistRepository = artistRepository;
             _fileRepository = fileRepository;
             _mapper = mapper;
         }
@@ -35,7 +35,7 @@ namespace Nava.Presentation.Controllers.v2
         [Authorize(AuthenticationSchemes = "Bearer")]
         public ActionResult<List<MongoArtistResultDto>> Get()
         {
-            var artists = _mongoRepository.AsQueryable().ToList();
+            var artists = _artistRepository.AsQueryable().ToList();
             return _mapper.Map<List<Artist>, List<MongoArtistResultDto>>(artists);
         }
 
@@ -43,9 +43,9 @@ namespace Nava.Presentation.Controllers.v2
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<MongoArtistResultDto>> Get(string id)
         {
-            var artist = await _mongoRepository.FindByIdAsync(id);
+            var artist = await _artistRepository.FindByIdAsync(id);
             if (artist is null)
-                throw new NotFoundException();
+                return NotFound();
 
             return Ok(MongoArtistResultDto.FromEntity(_mapper, artist));
         }
@@ -60,7 +60,7 @@ namespace Nava.Presentation.Controllers.v2
                 ? _fileRepository.SaveFileAsync(dto.ImageFile, ArtistsAvatarPath).GetAwaiter().GetResult()
                     .FileName
                 : null;
-            await _mongoRepository.InsertOneAsync(artist);
+            await _artistRepository.InsertOneAsync(artist);
             return Ok(MongoArtistResultDto.FromEntity(_mapper, artist));
         }
         
@@ -71,7 +71,7 @@ namespace Nava.Presentation.Controllers.v2
             if (id != dto.Id)
                 return BadRequest();
 
-            var artist = await _mongoRepository.FindByIdAsync(id);
+            var artist = await _artistRepository.FindByIdAsync(id);
 
             if (artist is null)
                 return NotFound();
@@ -90,7 +90,7 @@ namespace Nava.Presentation.Controllers.v2
                     : null;
             }
 
-            await _mongoRepository.ReplaceOneAsync(artist);
+            await _artistRepository.ReplaceOneAsync(artist);
             return Ok(MongoArtistResultDto.FromEntity(_mapper, artist));
         }
         
@@ -99,7 +99,7 @@ namespace Nava.Presentation.Controllers.v2
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> Delete(string id)
         {
-            var artist = await _mongoRepository.FindByIdAsync(id);
+            var artist = await _artistRepository.FindByIdAsync(id);
 
             if (artist is null)
                 throw new NotFoundException();
@@ -112,7 +112,7 @@ namespace Nava.Presentation.Controllers.v2
 
             _fileRepository.DeleteFile(Path.Combine(ArtistsAvatarPath, artist.AvatarPath));
 
-            await _mongoRepository.DeleteByIdAsync(id);
+            await _artistRepository.DeleteByIdAsync(id);
             return Ok();
         }
         
@@ -125,7 +125,7 @@ namespace Nava.Presentation.Controllers.v2
         [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<FileContentResult> GetArtistAvatar(string id)
         {
-            var artist = await _mongoRepository.FindByIdAsync(id);
+            var artist = await _artistRepository.FindByIdAsync(id);
             if (artist is null)
                 throw new BadRequestException("خواننده پیدا نشد");
 

@@ -14,6 +14,8 @@ using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContex
 
 namespace Nava.Presentation.Models
 {
+    #region SQL
+
     public class ArtistDto : BaseDto<ArtistDto, Artist>, IValidatableObject
     {
         [Display(Name = "نام کامل خواننده")]
@@ -118,6 +120,10 @@ namespace Nava.Presentation.Models
         }
     }
 
+    #endregion
+
+    #region MongoDB
+
     public class MongoArtistDto : BaseDto<MongoArtistDto, Entities.MongoDb.Artist, ObjectId>, IValidatableObject
     {
         protected new ObjectId Id { get; set; } = ObjectId.GenerateNewId(DateTime.Now);
@@ -215,4 +221,6 @@ namespace Nava.Presentation.Models
                     new[] { nameof(BirthDate) });
         }
     }
+
+    #endregion
 }

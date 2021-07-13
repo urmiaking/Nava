@@ -140,6 +140,13 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
+        <member name="M:Nava.Presentation.Controllers.v2.AlbumsController.GetArtworkFile(System.String)">
+            <summary>
+            Get the actual Artwork File of an album by it's unique Id
+            </summary>
+            <param name="id">Album's Unique Id</param>
+            <returns></returns>
+        </member>
         <member name="M:Nava.Presentation.Controllers.v2.ArtistsController.GetArtistAvatar(System.String)">
             <summary>
             Get the actual Avatar of an artist by it's unique Id

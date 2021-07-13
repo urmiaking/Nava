@@ -16,6 +16,8 @@ using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContex
 
 namespace Nava.Presentation.Models
 {
+    #region SQL
+
     public class UserDto : BaseDto<UserDto, User>, IValidatableObject
     {
         [Display(Name = "نام کاربری")]
@@ -97,6 +99,10 @@ namespace Nava.Presentation.Models
         [MaxLength(150, ErrorMessage = "{0} نمی تواند بیشتر از {1} کاراکتر باشد")]
         public string Bio { get; set; }
     }
+
+    #endregion
+
+    #region MongoDB
 
     public class MongoUserDto : BaseDto<MongoUserDto, Entities.MongoDb.User, ObjectId>, IValidatableObject
     {
@@ -188,4 +194,6 @@ namespace Nava.Presentation.Models
                 config => config.Ignore()).ReverseMap();
         }
     }
+
+    #endregion
 }

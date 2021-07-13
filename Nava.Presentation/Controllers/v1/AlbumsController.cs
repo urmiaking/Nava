@@ -57,6 +57,8 @@ namespace Nava.Presentation.Controllers.v1
                 {
                     artistList.Add(artist);
                 }
+                else
+                    return BadRequest("آیدی هنرمند اشتباه می باشد");
             }
 
             if (!artistList.Any())

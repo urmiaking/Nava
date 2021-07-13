@@ -17,7 +17,6 @@ using Nava.Common.Utilities;
 using Nava.Data.Contracts;
 using Nava.Entities.Media;
 using Nava.Entities.MongoDb;
-using Nava.Entities.User;
 using Nava.Presentation.Models;
 using Nava.Services.Services;
 using Nava.WebFramework.Api;
@@ -28,15 +27,15 @@ namespace Nava.Presentation.Controllers.v2
     [ApiVersion("2")]
     public class UserController : BaseController
     {
-        private readonly IMongoRepository<Entities.MongoDb.User> _mongoRepository;
+        private readonly IMongoRepository<User> _userRepository;
         private readonly IFileRepository _fileRepository;
         private readonly IMapper _mapper;
         private readonly IJwtService _jwtService;
         private const string UserAvatarPath = "wwwroot\\user_avatars";
 
-        public UserController(IMongoRepository<Entities.MongoDb.User> mongoRepository, IFileRepository fileRepository, IMapper mapper, IJwtService jwtService)
+        public UserController(IMongoRepository<User> userRepository, IFileRepository fileRepository, IMapper mapper, IJwtService jwtService)
         {
-            _mongoRepository = mongoRepository;
+            _userRepository = userRepository;
             _fileRepository = fileRepository;
             _mapper = mapper;
             _jwtService = jwtService;
@@ -51,12 +50,12 @@ namespace Nava.Presentation.Controllers.v2
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult> DeactivateUserAccount(string userId)
         {
-            var user = await _mongoRepository.FindByIdAsync(userId);
+            var user = await _userRepository.FindByIdAsync(userId);
             if (user is null)
                 throw new NotFoundException("کاربر یافت نشد");
 
             user.IsActive = false;
-            await _mongoRepository.ReplaceOneAsync(user);
+            await _userRepository.ReplaceOneAsync(user);
             return Ok();
         }
 
@@ -72,7 +71,7 @@ namespace Nava.Presentation.Controllers.v2
             if (!tokenRequest.grant_type.Equals("password", StringComparison.OrdinalIgnoreCase))
                 throw new Exception("OAuth flow is not password.");
 
-            var user = await _mongoRepository.FindOneAsync(a => a.UserName.Equals(tokenRequest.username));
+            var user = await _userRepository.FindOneAsync(a => a.UserName.Equals(tokenRequest.username));
             if (user == null)
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
@@ -84,7 +83,7 @@ namespace Nava.Presentation.Controllers.v2
                 throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
 
             user.SecurityStamp = Guid.NewGuid().ToString();
-            await _mongoRepository.ReplaceOneAsync(user);
+            await _userRepository.ReplaceOneAsync(user);
 
             var jwt = _jwtService.GenerateForMongo(user);
             return new JsonResult(jwt);
@@ -94,8 +93,8 @@ namespace Nava.Presentation.Controllers.v2
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public ActionResult<List<MongoUserResultDto>> Get()
         {
-            var users = _mongoRepository.AsQueryable().ToList();
-            var userResultList = _mapper.Map<List<Entities.MongoDb.User>, List<MongoUserResultDto>>(users);
+            var users = _userRepository.AsQueryable().ToList();
+            var userResultList = _mapper.Map<List<User>, List<MongoUserResultDto>>(users);
             return Ok(userResultList);
         }
 
@@ -103,7 +102,7 @@ namespace Nava.Presentation.Controllers.v2
         [AllowAnonymous]
         public async Task<ActionResult<MongoUserResultDto>> Get(string id)
         {
-            var user = await _mongoRepository.FindByIdAsync(id);
+            var user = await _userRepository.FindByIdAsync(id);
 
             if (user is null)
                 throw new NotFoundException();
@@ -152,7 +151,7 @@ namespace Nava.Presentation.Controllers.v2
 
             #endregion
 
-            await _mongoRepository.InsertOneAsync(user);
+            await _userRepository.InsertOneAsync(user);
 
             return Ok(MongoUserResultDto.FromEntity(_mapper, user));
         }
@@ -163,7 +162,7 @@ namespace Nava.Presentation.Controllers.v2
             if (dto.Id != id)
                 return BadRequest();
 
-            var user = await _mongoRepository.FindByIdAsync(id);
+            var user = await _userRepository.FindByIdAsync(id);
             user.Bio = dto.Bio;
             user.FullName = dto.FullName;
             user.UserName = dto.UserName;
@@ -187,7 +186,7 @@ namespace Nava.Presentation.Controllers.v2
                 };
             }
             user.SecurityStamp = Guid.NewGuid().ToString();
-            await _mongoRepository.ReplaceOneAsync(user);
+            await _userRepository.ReplaceOneAsync(user);
 
             return Ok(MongoUserResultDto.FromEntity(_mapper, user));
         }
@@ -195,12 +194,12 @@ namespace Nava.Presentation.Controllers.v2
         [HttpDelete("{id}")]
         public async Task<ApiResult> Delete(string id)
         {
-            var user = await _mongoRepository.FindByIdAsync(id);
+            var user = await _userRepository.FindByIdAsync(id);
 
             if (user is null)
                 throw new NotFoundException();
             _fileRepository.DeleteFile(Path.Combine(UserAvatarPath, user.AvatarPath ?? ""));
-            await _mongoRepository.DeleteByIdAsync(id);
+            await _userRepository.DeleteByIdAsync(id);
             return Ok();
         }
     }
