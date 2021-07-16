@@ -14,6 +14,9 @@ namespace Nava.Entities.MongoDb
         public User()
         {
             Roles = new List<string>();
+            FollowingArtists = new List<ObjectId>();
+            LikedMedias = new List<ObjectId>();
+            VisitedMedias = new List<ObjectId>();
         }
         public string UserName { get; set; }
         public string PasswordHash { get; set; }
@@ -24,5 +27,8 @@ namespace Nava.Entities.MongoDb
         public string Bio { get; set; }
         public bool IsActive { get; set; }
         public List<string> Roles { get; set; }
+        public List<ObjectId> FollowingArtists { get; set; }
+        public List<ObjectId> LikedMedias { get; set; }
+        public List<ObjectId> VisitedMedias { get; set; }
     }
 }

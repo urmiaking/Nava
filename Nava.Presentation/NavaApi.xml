@@ -154,6 +154,76 @@
             <param name="id">Artist's Unique Id</param>
             <returns></returns>
         </member>
+        <member name="M:Nava.Presentation.Controllers.v2.FollowingsController.Follow(System.String)">
+            <summary>
+            Follow an artist with it's unique Id by an authorized user
+            </summary>
+            <param name="artistId">Artist's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.FollowingsController.UnFollow(System.String)">
+            <summary>
+            UnFollow an artist with it's unique Id by an authorized user
+            </summary>
+            <param name="artistId">Artist's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.FollowingsController.GetFollowings(System.String)">
+            <summary>
+            Get artists which the authorized user has followed them
+            </summary>
+            <param name="userId">User's unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.FollowingsController.GetFollowers(System.String)">
+            <summary>
+            Get Followers of an artist by it's unique Id
+            </summary>
+            <param name="artistId">Artist's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.LikesController.Like(System.String)">
+            <summary>
+            Like a media with it's unique Id by an authorized user
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.LikesController.Dislike(System.String)">
+            <summary>
+            Dislike a media with it's unique Id by an authorized user
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.LikesController.GetLikedMedias(System.String)">
+            <summary>
+            Get medias which has been liked by a user with it's unique Id
+            </summary>
+            <param name="id">User's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.LikesController.GetLikedUsers(System.String)">
+            <summary>
+            Get Users which had liked a media with it's unique Id
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.MediasController.GetMediaFile(System.String)">
+            <summary>
+            Get the actual Media file by it's unique Id
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.MediasController.GetArtworkFile(System.String)">
+            <summary>
+            Get the actual Artwork file of a media by it's unique Id
+            </summary>
+            <param name="id">Media's Unique Id</param>
+            <returns></returns>
+        </member>
         <member name="M:Nava.Presentation.Controllers.v2.UserController.DeactivateUserAccount(System.String)">
             <summary>
             Deactivate a user's account by it's unique userId
@@ -166,6 +236,27 @@
             This method generate JWT Token
             </summary>
             <param name="tokenRequest">The information of token request</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.VisitsController.Visit(System.String)">
+            <summary>
+            A method for visiting a media by it's unique Id for authenticated user
+            </summary>
+            <param name="id">User's Unique id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.VisitsController.GetVisitedMedias(System.String)">
+            <summary>
+            Get Medias which has visited by a user with it's unique Id
+            </summary>
+            <param name="id">User's unique Id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Nava.Presentation.Controllers.v2.VisitsController.GetVisitedUsers(System.String)">
+            <summary>
+            Get Users which visited a media by it's unique Id
+            </summary>
+            <param name="id">>Media's unique Id</param>
             <returns></returns>
         </member>
     </members>
