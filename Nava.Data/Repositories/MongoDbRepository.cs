@@ -33,34 +33,22 @@ namespace Nava.Data.Repositories
             return collectionName;
         }
 
-        public virtual IQueryable<TDocument> AsQueryable()
-        {
-            return _collection.AsQueryable();
-        }
-
+        public virtual IQueryable<TDocument> AsQueryable() => _collection.AsQueryable();
+        
         public virtual IEnumerable<TDocument> FilterBy(
-            Expression<Func<TDocument, bool>> filterExpression)
-        {
-            return _collection.Find(filterExpression).ToEnumerable();
-        }
-
+            Expression<Func<TDocument, bool>> filterExpression) => _collection.Find(filterExpression).ToEnumerable();
+        
         public virtual IEnumerable<TProjected> FilterBy<TProjected>(
             Expression<Func<TDocument, bool>> filterExpression,
             Expression<Func<TDocument, TProjected>> projectionExpression)
-        {
-            return _collection.Find(filterExpression).Project(projectionExpression).ToEnumerable();
-        }
+            => _collection.Find(filterExpression).Project(projectionExpression).ToEnumerable();
 
         public virtual TDocument FindOne(Expression<Func<TDocument, bool>> filterExpression)
-        {
-            return _collection.Find(filterExpression).FirstOrDefault();
-        }
+            => _collection.Find(filterExpression).FirstOrDefault();
 
         public virtual Task<TDocument> FindOneAsync(Expression<Func<TDocument, bool>> filterExpression)
-        {
-            return Task.Run(() => _collection.Find(filterExpression).FirstOrDefaultAsync());
-        }
-
+            => Task.Run(() => _collection.Find(filterExpression).FirstOrDefaultAsync());
+        
         public virtual TDocument FindById(string id)
         {
             var objectId = new ObjectId(id);
@@ -78,16 +66,12 @@ namespace Nava.Data.Repositories
             });
         }
 
-
         public virtual void InsertOne(TDocument document)
         {
             _collection.InsertOne(document);
         }
 
-        public virtual Task InsertOneAsync(TDocument document)
-        {
-            return Task.Run(() => _collection.InsertOneAsync(document));
-        }
+        public virtual Task InsertOneAsync(TDocument document) => Task.Run(() => _collection.InsertOneAsync(document));
 
         public void InsertMany(ICollection<TDocument> documents)
         {
@@ -118,10 +102,8 @@ namespace Nava.Data.Repositories
         }
 
         public Task DeleteOneAsync(Expression<Func<TDocument, bool>> filterExpression)
-        {
-            return Task.Run(() => _collection.FindOneAndDeleteAsync(filterExpression));
-        }
-
+            => Task.Run(() => _collection.FindOneAndDeleteAsync(filterExpression));
+        
         public void DeleteById(string id)
         {
             var objectId = new ObjectId(id);
@@ -145,8 +127,6 @@ namespace Nava.Data.Repositories
         }
 
         public Task DeleteManyAsync(Expression<Func<TDocument, bool>> filterExpression)
-        {
-            return Task.Run(() => _collection.DeleteManyAsync(filterExpression));
-        }
+            => Task.Run(() => _collection.DeleteManyAsync(filterExpression));
     }
 }
