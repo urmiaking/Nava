@@ -48,7 +48,7 @@ namespace Nava.Presentation.Controllers.v1
             var user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
 
             if (user is null)
-                throw new UnauthorizedAccessException();
+                return Unauthorized();
 
             var artist = await _artistRepository.Table
                 .Include(a => a.Followers)
@@ -56,7 +56,7 @@ namespace Nava.Presentation.Controllers.v1
                     a.Id.Equals(artistId), cancellationToken);
 
             if (artist is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var follower = new Following
             {
@@ -68,7 +68,7 @@ namespace Nava.Presentation.Controllers.v1
                 .Any(a=> a.ArtistId.Equals(follower.ArtistId) && a.UserId.Equals(follower.UserId));
 
             if (followerExists)
-                throw new BadRequestException("شما این خواننده را از قبل دنبال کرده اید");
+                return BadRequest("شما این خواننده را از قبل دنبال کرده اید");
 
             artist.Followers.Add(follower);
 
@@ -90,7 +90,7 @@ namespace Nava.Presentation.Controllers.v1
             var user = await _userRepository.GetByUsernameAsync(username, cancellationToken);
 
             if (user is null)
-                throw new UnauthorizedAccessException();
+                return Unauthorized();
 
             var artist = await _artistRepository.Table
                 .Include(a => a.Followers)
@@ -98,13 +98,13 @@ namespace Nava.Presentation.Controllers.v1
                     a.Id.Equals(artistId), cancellationToken);
 
             if (artist is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var follower = await _followingRepository.Table
                 .FirstOrDefaultAsync(a => a.ArtistId.Equals(artistId) && a.UserId.Equals(user.Id), cancellationToken);
 
             if (follower == null)
-                throw new BadRequestException("شما این خواننده را از قبل دنبال نکرده اید");
+                return BadRequest("شما این خواننده را از قبل دنبال نکرده اید");
 
             artist.Followers.Remove(follower);
 
@@ -125,11 +125,11 @@ namespace Nava.Presentation.Controllers.v1
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != userId)
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException();
+                    return Forbid();
 
             var followings = await _followingRepository.TableNoTracking
                 .Include(a => a.Artist)

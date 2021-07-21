@@ -102,13 +102,10 @@ namespace Nava.Presentation.Controllers.v2
             var artist = await _artistRepository.FindByIdAsync(id);
 
             if (artist is null)
-                throw new NotFoundException();
+                return NotFound();
 
             if (artist.Albums.Any())
-                throw new BadRequestException("آلبوم های هنرمند خالی نمی باشد.");
-
-            //artist.Followers = null;
-            //await Repository.UpdateAsync(artist, cancellationToken);
+                return BadRequest("آلبوم های هنرمند خالی نمی باشد.");
 
             _fileRepository.DeleteFile(Path.Combine(ArtistsAvatarPath, artist.AvatarPath));
 

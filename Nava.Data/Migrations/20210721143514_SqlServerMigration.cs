@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Nava.Data.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class SqlServerMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -49,7 +49,7 @@ namespace Nava.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -247,72 +247,75 @@ namespace Nava.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Followings",
+                name: "Following",
                 columns: table => new
                 {
-                    FollowersId = table.Column<int>(type: "int", nullable: false),
-                    FollowingArtistsId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ArtistId = table.Column<int>(type: "int", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Followings", x => new { x.FollowersId, x.FollowingArtistsId });
+                    table.PrimaryKey("PK_Following", x => new { x.UserId, x.ArtistId });
                     table.ForeignKey(
-                        name: "FK_Followings_Artist_FollowingArtistsId",
-                        column: x => x.FollowingArtistsId,
+                        name: "FK_Following_Artist_ArtistId",
+                        column: x => x.ArtistId,
                         principalTable: "Artist",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Followings_AspNetUsers_FollowersId",
-                        column: x => x.FollowersId,
+                        name: "FK_Following_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Likes",
+                name: "LikedMedia",
                 columns: table => new
                 {
-                    LikedMediasId = table.Column<int>(type: "int", nullable: false),
-                    LikedUsersId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    MediaId = table.Column<int>(type: "int", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Likes", x => new { x.LikedMediasId, x.LikedUsersId });
+                    table.PrimaryKey("PK_LikedMedia", x => new { x.UserId, x.MediaId });
                     table.ForeignKey(
-                        name: "FK_Likes_AspNetUsers_LikedUsersId",
-                        column: x => x.LikedUsersId,
+                        name: "FK_LikedMedia_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Likes_Media_LikedMediasId",
-                        column: x => x.LikedMediasId,
+                        name: "FK_LikedMedia_Media_MediaId",
+                        column: x => x.MediaId,
                         principalTable: "Media",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Visits",
+                name: "VisitedMedia",
                 columns: table => new
                 {
-                    VisitedMediasId = table.Column<int>(type: "int", nullable: false),
-                    VisitedUsersId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    MediaId = table.Column<int>(type: "int", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Visits", x => new { x.VisitedMediasId, x.VisitedUsersId });
+                    table.PrimaryKey("PK_VisitedMedia", x => new { x.UserId, x.MediaId });
                     table.ForeignKey(
-                        name: "FK_Visits_AspNetUsers_VisitedUsersId",
-                        column: x => x.VisitedUsersId,
+                        name: "FK_VisitedMedia_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Visits_Media_VisitedMediasId",
-                        column: x => x.VisitedMediasId,
+                        name: "FK_VisitedMedia_Media_MediaId",
+                        column: x => x.MediaId,
                         principalTable: "Media",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
@@ -363,14 +366,14 @@ namespace Nava.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Followings_FollowingArtistsId",
-                table: "Followings",
-                column: "FollowingArtistsId");
+                name: "IX_Following_ArtistId",
+                table: "Following",
+                column: "ArtistId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Likes_LikedUsersId",
-                table: "Likes",
-                column: "LikedUsersId");
+                name: "IX_LikedMedia_MediaId",
+                table: "LikedMedia",
+                column: "MediaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Media_AlbumId",
@@ -378,9 +381,9 @@ namespace Nava.Data.Migrations
                 column: "AlbumId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Visits_VisitedUsersId",
-                table: "Visits",
-                column: "VisitedUsersId");
+                name: "IX_VisitedMedia_MediaId",
+                table: "VisitedMedia",
+                column: "MediaId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -404,13 +407,13 @@ namespace Nava.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Followings");
+                name: "Following");
 
             migrationBuilder.DropTable(
-                name: "Likes");
+                name: "LikedMedia");
 
             migrationBuilder.DropTable(
-                name: "Visits");
+                name: "VisitedMedia");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

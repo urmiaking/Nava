@@ -43,16 +43,16 @@ namespace Nava.Presentation.Controllers.v2
             var media = await _mediaRepository.FindByIdAsync(id);
 
             if (media is null)
-                throw new NotFoundException("مدیا یافت نشد");
+                return NotFound();
 
             var username = User.Identity?.Name;
             var likedUser = await _userRepository.FindOneAsync(a => a.UserName.Equals(username));
 
             if (likedUser is null)
-                throw new BadRequestException();
+                return Unauthorized();
 
             if (media.LikedUsers.Exists(a => a.Equals(likedUser.Id)))
-                throw new BadRequestException("این مدیا قبلا لایک شده است");
+                return BadRequest("این مدیا قبلا لایک شده است");
 
             media.LikedUsers.Add(likedUser.Id);
             likedUser.LikedMedias.Add(media.Id);
@@ -75,16 +75,16 @@ namespace Nava.Presentation.Controllers.v2
             var media = await _mediaRepository.FindByIdAsync(id);
 
             if (media is null)
-                throw new NotFoundException("مدیا یافت نشد");
+                return NotFound();
 
             var username = User.Identity?.Name;
             var likedUser = await _userRepository.FindOneAsync(a => a.UserName.Equals(username));
 
             if (likedUser is null)
-                throw new BadRequestException();
+                return Unauthorized();
 
             if (!media.LikedUsers.Exists(a => a.Equals(likedUser.Id)))
-                throw new BadHttpRequestException("این مدیا قبلا لایک نشده است");
+                return BadRequest("این مدیا قبلا لایک نشده است");
 
             media.LikedUsers.Remove(likedUser.Id);
             likedUser.LikedMedias.Remove(media.Id);
@@ -107,15 +107,15 @@ namespace Nava.Presentation.Controllers.v2
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.FindOneAsync(a => a.UserName.Equals(authorizedUserName));
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != new ObjectId(id))
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException("Restrict access.");
+                    return Forbid();
 
             var user = await _userRepository.FindByIdAsync(id);
 
-            if (user is null) throw new NotFoundException();
+            if (user is null) return NotFound();
 
             var likedMediaIds = user.LikedMedias.ToList();
 
@@ -141,7 +141,7 @@ namespace Nava.Presentation.Controllers.v2
         {
             var media = await _mediaRepository.FindByIdAsync(id);
 
-            if (media is null) throw new NotFoundException();
+            if (media is null) return NotFound();
 
             var likedUsers = new List<User>();
 

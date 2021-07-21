@@ -62,20 +62,16 @@ namespace Nava.Presentation.Controllers.v1
             }
 
             if (!artistList.Any())
-            {
                 return BadRequest("هنرمندی با آیدی داده شده پیدا نشد");
-            }
-
+            
             var album = dto.ToEntity(Mapper);
 
             album.Artists = artistList;
 
-            var artworkSaveResult = await _fileRepository.SaveFileAsync(dto.ImageFile, _albumsArtworkPath);
-            album.ArtworkPath = artworkSaveResult.FileCreationStatus switch
-            {
-                FileCreationStatus.Success => artworkSaveResult.FileName,
-                _ => null
-            };
+            album.ArtworkPath = dto.ImageFile != null
+                ? _fileRepository.SaveFileAsync(dto.ImageFile, _albumsArtworkPath).GetAwaiter().GetResult()
+                    .FileName
+                : null;
 
             await Repository.AddAsync(album, cancellationToken);
 
@@ -95,7 +91,7 @@ namespace Nava.Presentation.Controllers.v1
                 a.Id.Equals(id), cancellationToken);
 
             if (album is null)
-                throw new NotFoundException();
+                return NotFound();
 
             if (album.Medias.Any())
                 return BadRequest("خطا در حذف! آلبوم دارای مدیا می باشد.");
@@ -142,14 +138,11 @@ namespace Nava.Presentation.Controllers.v1
             if (dto.ImageFile != null)
             {
                 _fileRepository.DeleteFile(Path.Combine(_albumsArtworkPath, album.ArtworkPath ?? ""));
-                var avatarSaveResult = await _fileRepository.SaveFileAsync(dto.ImageFile, _albumsArtworkPath);
 
-                dto.ArtworkPath = avatarSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => avatarSaveResult.FileName,
-                    FileCreationStatus.Failed => throw new BadRequestException("درج تصویر جدید با مشکل مواجه شد"),
-                    _ => null
-                };
+                dto.ArtworkPath = dto.ImageFile != null
+                    ? _fileRepository.SaveFileAsync(dto.ImageFile, _albumsArtworkPath).GetAwaiter().GetResult()
+                        .FileName
+                    : null;
             }
             else
                 dto.ArtworkPath = null;

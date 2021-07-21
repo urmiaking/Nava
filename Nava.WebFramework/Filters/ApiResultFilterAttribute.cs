@@ -83,6 +83,18 @@ namespace Nava.WebFramework.Filters
                     context.Result = new JsonResult(apiResult) { StatusCode = objectResult.StatusCode };
                     break;
                 }
+                case ForbidResult forbidResult:
+                {
+                    var apiResult = new ApiResult(false, ApiResultStatusCode.Forbidden);
+                    context.Result = new JsonResult(apiResult) { StatusCode = 403 };
+                    break;
+                }
+                case NotFoundResult notFoundResult:
+                {
+                    var apiResult = new ApiResult(false, ApiResultStatusCode.NotFound);
+                    context.Result = new JsonResult(apiResult) { StatusCode = notFoundResult.StatusCode };
+                    break;
+                }
             }
 
             base.OnResultExecuting(context);

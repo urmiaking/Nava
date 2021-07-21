@@ -23,6 +23,9 @@ namespace Nava.Common
         UnAuthorized = 5,
 
         [Display(Name = "خطایی در پردازش رخ داده است")]
-        LogicError = 6
+        LogicError = 6,
+
+        [Display(Name = "دسترسی مجاز نمی باشد")]
+        Forbidden = 7
     }
 }

@@ -44,22 +44,21 @@ namespace Nava.Presentation.Controllers.v1
         public override async Task<ApiResult<ArtistResultDto>> Create([FromForm] ArtistDto dto, CancellationToken cancellationToken)
         {
             dto.Id = 0;
-            var avatarSaveResult = await _fileRepository.SaveFileAsync(dto.ImageFile, _artistsAvatarPath);
-            dto.AvatarPath = avatarSaveResult.FileCreationStatus switch
-            {
-                FileCreationStatus.Success => avatarSaveResult.FileName,
-                FileCreationStatus.Failed => throw new BadRequestException("خطا در ثبت نام"),
-                _ => null
-            };
+            dto.AvatarPath = dto.ImageFile != null
+                ? _fileRepository.SaveFileAsync(dto.ImageFile, _artistsAvatarPath).GetAwaiter().GetResult()
+                    .FileName
+                : null;
             return await base.Create(dto, cancellationToken);
         }
 
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public override async Task<ApiResult<ArtistResultDto>> Update(int id, [FromForm] ArtistUpdateDto dto, CancellationToken cancellationToken)
         {
-            dto.Id = id;
+            if (dto.Id != id)
+                return BadRequest();
 
-            var artist = await _artistRepository.TableNoTracking.FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
+            var artist = await _artistRepository.TableNoTracking
+                .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (artist is null)
                 return NotFound();
@@ -67,14 +66,11 @@ namespace Nava.Presentation.Controllers.v1
             if (dto.ImageFile != null)
             {
                 _fileRepository.DeleteFile(Path.Combine(_artistsAvatarPath, artist.AvatarPath ?? ""));
-                var avatarSaveResult = await _fileRepository.SaveFileAsync(dto.ImageFile, _artistsAvatarPath);
 
-                dto.AvatarPath = avatarSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => avatarSaveResult.FileName,
-                    FileCreationStatus.Failed => throw new BadRequestException("درج تصویر جدید با مشکل مواجه شد"),
-                    _ => null
-                };
+                dto.AvatarPath = dto.ImageFile != null
+                    ? _fileRepository.SaveFileAsync(dto.ImageFile, _artistsAvatarPath).GetAwaiter().GetResult()
+                        .FileName
+                    : null;
             }
             else
                 dto.AvatarPath = null;
@@ -92,10 +88,10 @@ namespace Nava.Presentation.Controllers.v1
                 a.Id.Equals(id), cancellationToken);
 
             if (artist is null)
-                throw new NotFoundException();
+                return NotFound();
 
             if (artist.Albums.Any())
-                throw new BadRequestException("آلبوم های هنرمند خالی نمی باشد.");
+                return BadRequest("آلبوم های هنرمند خالی نمی باشد.");
 
             artist.Followers = null;
             await Repository.UpdateAsync(artist, cancellationToken);

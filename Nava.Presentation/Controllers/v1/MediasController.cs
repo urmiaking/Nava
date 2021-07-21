@@ -50,10 +50,12 @@ namespace Nava.Presentation.Controllers.v1
         public override async Task<ApiResult<MediaResultDto>> Create([FromForm] MediaDto dto, CancellationToken cancellationToken)
         {
             dto.Id = 0;
+
             var relatedAlbum = await _albumRepository.TableNoTracking
                 .Include(a => a.Medias)
                 .FirstOrDefaultAsync(a => 
                     a.Id.Equals(dto.AlbumId), cancellationToken);
+
             if (relatedAlbum is null)
                 return BadRequest("آلبوم مدیا یافت نشد");
 
@@ -64,23 +66,15 @@ namespace Nava.Presentation.Controllers.v1
                 return BadRequest("وضعیت آلبوم تکیمل شده می باشد و امکان اضافه کردن مدیا به آن وجود ندارد");
 
             if (dto.ArtworkFile != null)
-            {
-                var artworkSaveResult = await _fileRepository.SaveFileAsync(dto.ArtworkFile, _mediaArtworkPath);
-                dto.ArtworkPath = artworkSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => artworkSaveResult.FileName,
-                    _ => null
-                };
-            }
+                dto.ArtworkPath = dto.ArtworkFile != null
+                    ? _fileRepository.SaveFileAsync(dto.ArtworkFile, _mediaArtworkPath).GetAwaiter().GetResult().FileName
+                    : null;
             else
                 dto.ArtworkPath = null;
 
-            var fileSaveResult = await _fileRepository.SaveFileAsync(dto.MediaFile, _mediaFilePath);
-            dto.FilePath = fileSaveResult.FileCreationStatus switch
-            {
-                FileCreationStatus.Success => fileSaveResult.FileName,
-                _ => null
-            };
+            dto.FilePath = dto.MediaFile != null
+                ? _fileRepository.SaveFileAsync(dto.MediaFile, _mediaFilePath).GetAwaiter().GetResult().FileName
+                : null;
 
             return await base.Create(dto, cancellationToken);
         }
@@ -110,7 +104,8 @@ namespace Nava.Presentation.Controllers.v1
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public override async Task<ApiResult<MediaResultDto>> Update(int id, [FromForm] MediaUpdateDto dto, CancellationToken cancellationToken)
         {
-            dto.Id = id;
+            if (dto.Id != id)
+                return BadRequest();
 
             var media = await _mediaRepository.GetByIdAsync(cancellationToken, id);
 
@@ -124,12 +119,10 @@ namespace Nava.Presentation.Controllers.v1
             if (dto.ArtworkFile != null)
             {
                 _fileRepository.DeleteFile(Path.Combine(_mediaArtworkPath, media.ArtworkPath ?? ""));
-                var artworkSaveResult = await _fileRepository.SaveFileAsync(dto.ArtworkFile, _mediaArtworkPath);
-                dto.ArtworkPath = artworkSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => artworkSaveResult.FileName,
-                    _ => null
-                };
+
+                dto.ArtworkPath = dto.ArtworkFile != null
+                    ? _fileRepository.SaveFileAsync(dto.ArtworkFile, _mediaArtworkPath).GetAwaiter().GetResult().FileName
+                    : null;
             }
             else
                 dto.ArtworkPath = null;
@@ -137,12 +130,10 @@ namespace Nava.Presentation.Controllers.v1
             if (dto.MediaFile != null)
             {
                 _fileRepository.DeleteFile(Path.Combine(_mediaFilePath, media.FilePath ?? ""));
-                var fileSaveResult = await _fileRepository.SaveFileAsync(dto.MediaFile, _mediaFilePath);
-                dto.FilePath = fileSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => fileSaveResult.FileName,
-                    _ => null
-                };
+
+                dto.FilePath = dto.MediaFile != null
+                    ? _fileRepository.SaveFileAsync(dto.MediaFile, _mediaFilePath).GetAwaiter().GetResult().FileName
+                    : null;
             }
 
             return await base.Update(id, dto, cancellationToken);
@@ -191,7 +182,5 @@ namespace Nava.Presentation.Controllers.v1
             return File(await System.IO.File.ReadAllBytesAsync(path, cancellationToken),
                 contentType, $"{media.Title}{fileFormat}", true);
         }
-
-        
     }
 }

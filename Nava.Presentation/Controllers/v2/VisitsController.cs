@@ -43,12 +43,12 @@ namespace Nava.Presentation.Controllers.v2
             var media = await _mediaRepository.FindByIdAsync(id);
 
             if (media is null)
-                throw new NotFoundException("مدیا یافت نشد");
+                return NotFound();
 
             var username = User.Identity?.Name;
             var visitedUser = await _userRepository.FindOneAsync(a => a.UserName.Equals(username));
 
-            if (visitedUser is null) throw new BadRequestException();
+            if (visitedUser is null) return Unauthorized();
 
             if (visitedUser.VisitedMedias.Exists(a => a.Equals(media.Id)))
                 return Ok();
@@ -74,16 +74,16 @@ namespace Nava.Presentation.Controllers.v2
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.FindOneAsync(a => a.UserName.Equals(authorizedUserName));
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != new ObjectId(id))
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException("Restrict access.");
+                    return Forbid();
 
             var user = await _userRepository.FindByIdAsync(id);
 
             if (user is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var visitedMedias = new List<Media>();
 
@@ -108,7 +108,7 @@ namespace Nava.Presentation.Controllers.v2
             var media = await _mediaRepository.FindByIdAsync(id);
 
             if (media is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var visitedUsers = new List<User>();
 

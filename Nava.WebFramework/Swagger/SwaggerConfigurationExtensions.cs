@@ -125,7 +125,7 @@ namespace Nava.WebFramework.Swagger
                     {
                         Password = new OpenApiOAuthFlow
                         {
-                            TokenUrl = new Uri("/api/v2/user/Token", UriKind.Relative),
+                            TokenUrl = new Uri("/api/v1/user/Token", UriKind.Relative),
                             //AuthorizationUrl = new Uri("/api/v1/users/Token", UriKind.Relative)
                             //Scopes = new Dictionary<string, string>
                             //{

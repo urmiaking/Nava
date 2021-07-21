@@ -32,6 +32,16 @@ namespace Nava.WebFramework.Api
             return new ApiResult(false, ApiResultStatusCode.BadRequest);
         }
 
+        public static implicit operator ApiResult(NotFoundResult result)
+        {
+            return new ApiResult(false, ApiResultStatusCode.NotFound);
+        }
+
+        public static implicit operator ApiResult(ForbidResult result)
+        {
+            return new ApiResult(false, ApiResultStatusCode.Forbidden);
+        }
+
         public static implicit operator ApiResult(BadRequestObjectResult result)
         {
             var message = result.Value.ToString();
@@ -113,6 +123,11 @@ namespace Nava.WebFramework.Api
         public static implicit operator ApiResult<TData>(NotFoundResult result)
         {
             return new ApiResult<TData>(false, ApiResultStatusCode.NotFound, null);
+        }
+
+        public static implicit operator ApiResult<TData>(ForbidResult result)
+        {
+            return new ApiResult<TData>(false, ApiResultStatusCode.Forbidden, null);
         }
 
         public static implicit operator ApiResult<TData>(NotFoundObjectResult result)

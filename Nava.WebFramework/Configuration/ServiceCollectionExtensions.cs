@@ -112,7 +112,7 @@ namespace Nava.WebFramework.Configuration
 
                             var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
                             if (claimsIdentity.Claims?.Any() != true)
-                                context.Fail("This token has no claims.");
+                                context.Fail("This token has no claims");
 
                             var securityStamp = await signInManager.ValidateSecurityStampAsync(context.Principal);
 
@@ -134,16 +134,16 @@ namespace Nava.WebFramework.Configuration
 
                             var validatedUser = await signInManager.ValidateSecurityStampAsync(context.Principal);
                             if (validatedUser == null)
-                                context.Fail("Token security stamp is not valid.");
+                                context.Fail("Token security stamp is not valid");
 
                             if (!user.IsActive)
-                                context.Fail("User is not active.");
+                                context.Fail("User is not active");
                         }
                         else
                         {
                             var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
                             if (claimsIdentity.Claims?.Any() != true)
-                                context.Fail("This token has no claims.");
+                                context.Fail("This token has no claims");
 
                             var mongoUserRepository = context.HttpContext.RequestServices.GetRequiredService<IMongoRepository<Entities.MongoDb.User>>();
 
@@ -153,13 +153,11 @@ namespace Nava.WebFramework.Configuration
                             var user = await mongoUserRepository.FindByIdAsync(userId);
 
                             if (user.SecurityStamp != securityStampInContext)
-                                context.Fail("Token security stamp is not valid.");
+                                context.Fail("Token security stamp is not valid");
 
                             if (!user.IsActive)
-                                context.Fail("User is not active.");
+                                context.Fail("User is not active");
                         }
-
-                        
                     },
                     OnChallenge = context =>
                     {
@@ -167,8 +165,8 @@ namespace Nava.WebFramework.Configuration
                         logger.LogError("OnChallenge error", context.Error, context.ErrorDescription);
 
                         if (context.AuthenticateFailure != null)
-                            throw new AppException(ApiResultStatusCode.UnAuthorized, "Authenticate failure.", HttpStatusCode.Unauthorized, context.AuthenticateFailure, null);
-                        throw new AppException(ApiResultStatusCode.UnAuthorized, "You are unauthorized to access this resource.", HttpStatusCode.Unauthorized);
+                            throw new AppException(ApiResultStatusCode.UnAuthorized, "Invalid token! Authenticate failure", HttpStatusCode.Unauthorized, context.AuthenticateFailure, null);
+                        throw new AppException(ApiResultStatusCode.UnAuthorized, "You are unauthorized to access this resource", HttpStatusCode.Unauthorized);
                     }
                 };
             });

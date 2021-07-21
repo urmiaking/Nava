@@ -49,7 +49,7 @@ namespace Nava.Presentation.Controllers.v1
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (media is null)
-                throw new NotFoundException("مدیا یافت نشد");
+                return NotFound();
 
             var username = User.Identity?.Name;
             var visitedUser = await _userRepository.Table
@@ -57,7 +57,7 @@ namespace Nava.Presentation.Controllers.v1
                     a.UserName.Equals(username), cancellationToken);
 
             if (visitedUser is null)
-                throw new BadRequestException();
+                return BadRequest();
 
             var visitedMedia = new VisitedMedia
             {
@@ -96,17 +96,17 @@ namespace Nava.Presentation.Controllers.v1
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != id)
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException("Restrict access.");
+                    return Forbid();
 
             var user = await _userRepository.TableNoTracking.Include(a => a.LikedMedias)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (user is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var visitedMedias = await _visitedMediaRepository.TableNoTracking
                 .Include(a => a.Media)
@@ -139,7 +139,7 @@ namespace Nava.Presentation.Controllers.v1
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (media is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var visitedMedias = await _visitedMediaRepository.TableNoTracking
                 .Include(a => a.User)

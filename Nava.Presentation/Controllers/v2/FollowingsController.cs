@@ -45,14 +45,14 @@ namespace Nava.Presentation.Controllers.v2
             var username = User.Identity?.Name;
             var user = await _userRepository.FindOneAsync(a => a.UserName.Equals(username));
 
-            if (user is null) throw new UnauthorizedAccessException();
+            if (user is null) return Unauthorized();
 
             var artist = await _artistRepository.FindByIdAsync(artistId);
 
-            if (artist is null) throw new NotFoundException();
+            if (artist is null) return NotFound();
 
             if (user.FollowingArtists.Exists(a => a.Equals(artist.Id)))
-                throw new BadRequestException("شما این خواننده را از قبل دنبال کرده اید");
+                return BadRequest("شما این خواننده را از قبل دنبال کرده اید");
 
             artist.Followers.Add(user.Id);
             user.FollowingArtists.Add(artist.Id);
@@ -75,14 +75,14 @@ namespace Nava.Presentation.Controllers.v2
             var username = User.Identity?.Name;
             var user = await _userRepository.FindOneAsync(a => a.UserName.Equals(username));
 
-            if (user is null) throw new UnauthorizedAccessException();
+            if (user is null) return Unauthorized();
 
             var artist = await _artistRepository.FindByIdAsync(artistId);
 
-            if (artist is null) throw new NotFoundException();
+            if (artist is null) return NotFound();
 
             if (!user.FollowingArtists.Exists(a => a.Equals(artist.Id)))
-                throw new BadRequestException("شما این خواننده را از قبل دنبال نکرده اید");
+                return BadRequest("شما این خواننده را از قبل دنبال نکرده اید");
 
             artist.Followers.Remove(user.Id);
             user.FollowingArtists.Remove(artist.Id);
@@ -105,11 +105,11 @@ namespace Nava.Presentation.Controllers.v2
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.FindOneAsync(a => a.UserName.Equals(authorizedUserName));
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != new ObjectId(userId))
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException();
+                    return Forbid();
 
             var artists = new List<Artist>();
 

@@ -52,7 +52,10 @@ namespace Nava.Presentation.Controllers.v2
         {
             var user = await _userRepository.FindByIdAsync(userId);
             if (user is null)
-                throw new NotFoundException("کاربر یافت نشد");
+                return NotFound();
+
+            if (user.Roles.Contains(Role.Admin))
+                return BadRequest("کاربر ادمین نمی تواند غیرفعال شود!");
 
             user.IsActive = false;
             await _userRepository.ReplaceOneAsync(user);
@@ -69,18 +72,18 @@ namespace Nava.Presentation.Controllers.v2
         public async Task<ActionResult> Token([FromForm] TokenRequest tokenRequest)
         {
             if (!tokenRequest.grant_type.Equals("password", StringComparison.OrdinalIgnoreCase))
-                throw new Exception("OAuth flow is not password.");
+                return BadRequest("OAuth flow is not password.");
 
             var user = await _userRepository.FindOneAsync(a => a.UserName.Equals(tokenRequest.username));
             if (user == null)
-                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+                return BadRequest("نام کاربری یا رمز عبور اشتباه است");
 
             if (!user.IsActive)
-                return new ForbidResult();
+                return Forbid();
 
             var isPasswordValid = user.PasswordHash.Equals(SecurityHelper.GetSha256Hash(tokenRequest.password));
             if (!isPasswordValid)
-                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+                return BadRequest("نام کاربری یا رمز عبور اشتباه است");
 
             user.SecurityStamp = Guid.NewGuid().ToString();
             await _userRepository.ReplaceOneAsync(user);
@@ -105,7 +108,7 @@ namespace Nava.Presentation.Controllers.v2
             var user = await _userRepository.FindByIdAsync(id);
 
             if (user is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var userResult = MongoUserResultDto.FromEntity(_mapper, user);
             return Ok(userResult);
@@ -171,19 +174,14 @@ namespace Nava.Presentation.Controllers.v2
                 if (user.PasswordHash.Equals(SecurityHelper.GetSha256Hash(dto.CurrentPassword)))
                     user.PasswordHash = SecurityHelper.GetSha256Hash(dto.NewPassword);
                 else
-                    throw new BadRequestException("رمز عبور فعلی اشتباه است");
+                    return BadRequest("رمز عبور فعلی اشتباه است");
 
             if (dto.AvatarFile != null)
             {
                 _fileRepository.DeleteFile(Path.Combine(UserAvatarPath, user.AvatarPath ?? ""));
-                var avatarSaveResult = await _fileRepository.SaveFileAsync(dto.AvatarFile, UserAvatarPath);
-
-                user.AvatarPath = avatarSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => avatarSaveResult.FileName,
-                    FileCreationStatus.Failed => throw new BadRequestException("درج تصویر جدید با مشکل مواجه شد"),
-                    _ => null
-                };
+                user.AvatarPath = dto.AvatarFile != null
+                    ? _fileRepository.SaveFileAsync(dto.AvatarFile, UserAvatarPath).GetAwaiter().GetResult().FileName
+                    : null;
             }
             user.SecurityStamp = Guid.NewGuid().ToString();
             await _userRepository.ReplaceOneAsync(user);
@@ -197,7 +195,11 @@ namespace Nava.Presentation.Controllers.v2
             var user = await _userRepository.FindByIdAsync(id);
 
             if (user is null)
-                throw new NotFoundException();
+                return NotFound();
+
+            if (user.Roles.Contains(Role.Admin))
+                return BadRequest("کاربر مدیر نمی تواند حذف شود!");
+
             _fileRepository.DeleteFile(Path.Combine(UserAvatarPath, user.AvatarPath ?? ""));
             await _userRepository.DeleteByIdAsync(id);
             return Ok();

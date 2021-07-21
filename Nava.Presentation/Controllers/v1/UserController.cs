@@ -64,16 +64,16 @@ namespace Nava.Presentation.Controllers.v1
 
         [HttpGet("{id:int}")]
         [Authorize(Roles = Role.User + "," + Role.Admin, AuthenticationSchemes = "Bearer")]
-        public virtual async Task<ActionResult<User>> Get(int id, CancellationToken cancellationToken)
+        public virtual async Task<ActionResult<UserResultDto>> Get(int id, CancellationToken cancellationToken)
         {
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
-
+            if (authorizedUser is null) return Unauthorized();
+            
             if (authorizedUser.Id != id)
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException();
+                    return Forbid();
 
             var user = await _userRepository.TableNoTracking.ProjectTo<UserResultDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync(u => u.Id.Equals(id), cancellationToken);
@@ -92,16 +92,10 @@ namespace Nava.Presentation.Controllers.v1
             var user = userDto.ToEntity(_mapper);
 
             if (userDto.AvatarFile != null)
-            {
-                var avatarSaveResult = await _fileRepository.SaveFileAsync(userDto.AvatarFile, _userAvatarPath);
-
-                user.AvatarPath = avatarSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => avatarSaveResult.FileName,
-                    FileCreationStatus.Failed => throw new BadRequestException("خطا در ثبت نام"),
-                    _ => null
-                };
-            }
+                user.AvatarPath = userDto.AvatarFile != null
+                    ? _fileRepository.SaveFileAsync(userDto.AvatarFile, _userAvatarPath).GetAwaiter().GetResult()
+                        .FileName
+                    : null;
 
             await _userManager.CreateAsync(user, userDto.Password);
 
@@ -110,7 +104,6 @@ namespace Nava.Presentation.Controllers.v1
                 await _roleManager.CreateAsync(new Entities.User.Role { Name = Role.User });
                 await _roleManager.FindByNameAsync(Role.User);
             }
-
             await _userManager.AddToRoleAsync(user, Role.User);
 
             var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserResultDto>(_mapper.ConfigurationProvider)
@@ -130,19 +123,18 @@ namespace Nava.Presentation.Controllers.v1
         public virtual async Task<ActionResult> Token([FromForm] TokenRequest tokenRequest, CancellationToken cancellationToken)
         {
             if (!tokenRequest.grant_type.Equals("password", StringComparison.OrdinalIgnoreCase))
-                throw new Exception("OAuth flow is not password.");
+                return BadRequest("OAuth flow is not password.");
 
-            //var user = await userRepository.GetByUserAndPass(username, password, cancellationToken);
             var user = await _userManager.FindByNameAsync(tokenRequest.username);
             if (user == null)
-                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+                return BadRequest("نام کاربری یا رمز عبور اشتباه است");
 
             if (!user.IsActive)
-                return new ForbidResult();
-            
+                return Forbid();
+
             var isPasswordValid = await _userManager.CheckPasswordAsync(user, tokenRequest.password);
             if (!isPasswordValid)
-                throw new BadRequestException("نام کاربری یا رمز عبور اشتباه است");
+                return BadRequest("نام کاربری یا رمز عبور اشتباه است");
 
             var jwt = await _jwtService.GenerateAsync(user);
             return new JsonResult(jwt);
@@ -155,11 +147,11 @@ namespace Nava.Presentation.Controllers.v1
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != id)
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException("Restrict access.");
+                    return Forbid();
 
             var user = await _userRepository.Table
                 .Include(a => a.LikedMedias)
@@ -168,7 +160,10 @@ namespace Nava.Presentation.Controllers.v1
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (user is null)
-                throw new NotFoundException($"کاربری با شناسه {id} پیدا نشد.");
+                return NotFound();
+
+            if (await _userManager.IsInRoleAsync(user, Role.Admin))
+                throw new LogicException("حذف کاربر مدیر امکان پذیر نیست!");
 
             var rolesForUser = await _userManager.GetRolesAsync(user);
 
@@ -191,42 +186,39 @@ namespace Nava.Presentation.Controllers.v1
         [Authorize(Roles = Role.User + "," + Role.Admin, AuthenticationSchemes = "Bearer")]
         public virtual async Task<ApiResult<UserResultDto>> Update(int id, [FromForm] UserUpdateDto dto, CancellationToken cancellationToken)
         {
+            if (dto.Id != id)
+                return BadRequest();
+
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != id)
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException("Restrict access.");
-
-            dto.Id = id;
+                    return Forbid();
 
             var user = await _userRepository.GetByIdAsync(cancellationToken, id);
+
+            if (dto.NewPassword != null && dto.CurrentPassword != null)
+            {
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+                if (!changePasswordResult.Succeeded)
+                    return BadRequest("رمز عبور فعلی اشتباه است");
+            }
 
             user = dto.ToEntity(_mapper, user);
 
             if (dto.AvatarFile != null)
             {
                 _fileRepository.DeleteFile(Path.Combine(_userAvatarPath, user.AvatarPath ?? ""));
-                var avatarSaveResult = await _fileRepository.SaveFileAsync(dto.AvatarFile, _userAvatarPath);
 
-                user.AvatarPath = avatarSaveResult.FileCreationStatus switch
-                {
-                    FileCreationStatus.Success => avatarSaveResult.FileName,
-                    FileCreationStatus.Failed => throw new BadRequestException("درج تصویر جدید با مشکل مواجه شد"),
-                    _ => null
-                };
+                user.AvatarPath = dto.AvatarFile != null
+                    ? _fileRepository.SaveFileAsync(dto.AvatarFile, _userAvatarPath).GetAwaiter().GetResult()
+                        .FileName
+                    : null;
             }
-
             await _userManager.UpdateAsync(user);
-
-            if (dto.NewPassword != null && dto.CurrentPassword != null)
-            {
-                var changePasswordResult = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
-                if (!changePasswordResult.Succeeded)
-                    throw new BadRequestException("رمز عبور فعلی اشتباه است");
-            }
 
             var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserResultDto>(_mapper.ConfigurationProvider)
                 .SingleOrDefaultAsync(p => p.Id.Equals(user.Id), cancellationToken);
@@ -247,8 +239,11 @@ namespace Nava.Presentation.Controllers.v1
             var user = await _userRepository.GetByIdAsync(cancellationToken, userId);
 
             if (user is null)
-                throw new NotFoundException("کاربر یافت نشد");
+                return NotFound();
 
+            if (await _userManager.IsInRoleAsync(user, Role.Admin))
+                return BadRequest("کاربر مدیر نمی تواند غیرفعال شود!");
+            
             user.IsActive = false;
             await _userManager.UpdateAsync(user);
 

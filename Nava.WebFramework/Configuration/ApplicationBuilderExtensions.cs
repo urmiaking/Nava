@@ -16,8 +16,8 @@ namespace Nava.WebFramework.Configuration
     {
         public static void UseHsts(this IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (!env.IsDevelopment())
-                app.UseHsts();
+            //if (!env.IsDevelopment())
+                //app.UseHsts();
         }
 
         public static IApplicationBuilder IntializeDatabase(this IApplicationBuilder app)

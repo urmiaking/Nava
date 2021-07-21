@@ -29,31 +29,36 @@ namespace Nava.Services.DataInitializer
             {
                 _roleManager.CreateAsync(new Role { Name = Common.Role.Admin, Description = "Admin role" }).GetAwaiter().GetResult();
             }
-            if (!_userManager.Users.AsNoTracking().Any(p => p.NormalizedUserName == "ADMIN"))
+            
+            var adminUserList = _userManager.GetUsersInRoleAsync(Common.Role.Admin).GetAwaiter().GetResult().ToList();
+
+            if (adminUserList.Count == 0)
             {
                 var user = new User
                 {
-                    FullName = "ادمین سایت",
+                    FullName = "ادمین",
                     UserName = "admin",
-                    Email = "admin@admin.com"
+                    Email = "admin@admin.com",
+                    Bio = "مدیر اپلیکیشن نوا"
                 };
                 _userManager.CreateAsync(user, "masoud").GetAwaiter().GetResult();
                 _userManager.AddToRoleAsync(user, Common.Role.Admin).GetAwaiter().GetResult();
             }
 
-            var mongoAdmin = _mongoRepository.FindOne(a => a.UserName.Equals("admin"));
+            var mongoAdmin = _mongoRepository.FindOne(a => 
+                a.Id == ObjectId.Parse("AAAAAAAAAAAAAAAAAAAAAAAA"));
 
             if (mongoAdmin is null)
             {
                 var mongoUser = new Entities.MongoDb.User
                 {
-                    FullName = "ادمین سایت",
+                    FullName = "ادمین",
                     UserName = "admin",
                     PasswordHash = "25AXN8QeSQ3si97ZE/ES5efHIMOEdVjw5cZRKL2xs0w=",
                     IsActive = true,
-                    Id = ObjectId.GenerateNewId(DateTime.Now),
+                    Id = ObjectId.Parse("AAAAAAAAAAAAAAAAAAAAAAAA"),
                     Roles = new List<string> {Common.Role.Admin},
-                    Bio = "مدیریت API"
+                    Bio = "مدیر اپلیکیشن نوا"
                 };
                 _mongoRepository.InsertOne(mongoUser);
             }

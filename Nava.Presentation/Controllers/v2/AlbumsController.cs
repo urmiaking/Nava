@@ -95,7 +95,7 @@ namespace Nava.Presentation.Controllers.v2
             var album = await _albumRepository.FindByIdAsync(id);
 
             if (album is null)
-                throw new NotFoundException();
+                return NotFound();
 
             if (album.Medias.Any())
                 return BadRequest("خطا در حذف! آلبوم دارای مدیا می باشد.");

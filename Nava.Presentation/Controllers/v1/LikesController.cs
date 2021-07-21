@@ -49,7 +49,7 @@ namespace Nava.Presentation.Controllers.v1
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (media is null)
-                throw new NotFoundException("مدیا یافت نشد");
+                return NotFound();
 
             var username = User.Identity?.Name;
             var likedUser = await _userRepository.Table
@@ -57,7 +57,7 @@ namespace Nava.Presentation.Controllers.v1
                     a.UserName.Equals(username), cancellationToken);
 
             if (likedUser is null)
-                throw new BadRequestException();
+                return BadRequest();
 
             var mediaLike = new LikedMedia
             {
@@ -66,7 +66,7 @@ namespace Nava.Presentation.Controllers.v1
             };
 
             if (media.LikedUsers.Any(a => a.MediaId.Equals(media.Id) && a.UserId.Equals(likedUser.Id)))
-                throw new BadRequestException("این مدیا قبلا لایک شده است");
+                return BadRequest("این مدیا قبلا لایک شده است");
 
             media.LikedUsers.Add(mediaLike);
 
@@ -90,7 +90,7 @@ namespace Nava.Presentation.Controllers.v1
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (media is null)
-                throw new NotFoundException("مدیا یافت نشد");
+                return NotFound();
 
             var username = User.Identity?.Name;
             var likedUser = await _userRepository.Table
@@ -98,12 +98,12 @@ namespace Nava.Presentation.Controllers.v1
                     a.UserName.Equals(username), cancellationToken);
 
             if (likedUser is null)
-                throw new BadRequestException();
+                return BadRequest();
 
             var likedMedia = media.LikedUsers.FirstOrDefault(a => a.MediaId.Equals(media.Id) && a.UserId.Equals(likedUser.Id));
 
             if (likedMedia is null)
-                throw new BadHttpRequestException("این مدیا قبلا لایک نشده است");
+                return BadRequest("این مدیا قبلا لایک نشده است");
 
             media.LikedUsers.Remove(likedMedia);
 
@@ -125,17 +125,17 @@ namespace Nava.Presentation.Controllers.v1
             var authorizedUserName = User.Identity?.Name;
             var authorizedUser = await _userRepository.GetByUsernameAsync(authorizedUserName, cancellationToken);
 
-            if (authorizedUser is null) throw new UnauthorizedAccessException();
+            if (authorizedUser is null) return Unauthorized();
 
             if (authorizedUser.Id != id)
                 if (!User.IsInRole(Role.Admin))
-                    throw new UnauthorizedAccessException("Restrict access.");
+                    return Forbid();
 
             var user = await _userRepository.TableNoTracking.Include(a => a.LikedMedias)
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (user is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var likedMedias = await _likedMediaRepository.TableNoTracking.Include(a => a.Media)
                 .ThenInclude(a => a.Album)
@@ -167,7 +167,7 @@ namespace Nava.Presentation.Controllers.v1
                 .FirstOrDefaultAsync(a => a.Id.Equals(id), cancellationToken);
 
             if (media is null)
-                throw new NotFoundException();
+                return NotFound();
 
             var likedMedias = await _likedMediaRepository.TableNoTracking
                 .Include(a => a.User)

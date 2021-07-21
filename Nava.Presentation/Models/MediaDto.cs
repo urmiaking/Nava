@@ -115,7 +115,7 @@ namespace Nava.Presentation.Models
         }
     }
 
-    public class MediaUpdateDto : BaseDto<MediaUpdateDto, Media>
+    public class MediaUpdateDto : BaseDto<MediaUpdateDto, Media>, IValidatableObject
     {
         [Display(Name = "نام اثر")]
         [MaxLength(100, ErrorMessage = "{0} نمی تواند بیشتر از {1} کاراکتر باشد")]
@@ -160,6 +160,14 @@ namespace Nava.Presentation.Models
         [MaxFileSize(500 * 1024 * 1024)]
         [AllowedExtensions(new[] { ".mp3", ".mp4", ".aac", ".wav", ".wma", ".avi", ".mkv" })]
         public IFormFile MediaFile { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (Type is MediaType.Music && ArtworkFile is null)
+                yield return new ValidationResult(
+                    "عکس آهنگ را آپلود کنید.",
+                    new[] { nameof(ArtworkFile) });
+        }
     }
 
     #endregion
