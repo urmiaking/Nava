@@ -20,6 +20,8 @@ using Nava.Entities.MongoDb;
 using Nava.Presentation.Models;
 using Nava.Services.Services;
 using Nava.WebFramework.Api;
+using Artist = Nava.Entities.MongoDb.Artist;
+using Media = Nava.Entities.MongoDb.Media;
 using Role = Nava.Common.Role;
 
 namespace Nava.Presentation.Controllers.v2
@@ -28,17 +30,22 @@ namespace Nava.Presentation.Controllers.v2
     public class UserController : BaseController
     {
         private readonly IMongoRepository<User> _userRepository;
+        private readonly IMongoRepository<Media> _mediaRepository;
+        private readonly IMongoRepository<Artist> _artistRepository;
+
         private readonly IFileRepository _fileRepository;
         private readonly IMapper _mapper;
         private readonly IJwtService _jwtService;
         private const string UserAvatarPath = "wwwroot\\user_avatars";
 
-        public UserController(IMongoRepository<User> userRepository, IFileRepository fileRepository, IMapper mapper, IJwtService jwtService)
+        public UserController(IMongoRepository<User> userRepository, IFileRepository fileRepository, IMapper mapper, IJwtService jwtService, IMongoRepository<Media> mediaRepository, IMongoRepository<Artist> artistRepository)
         {
             _userRepository = userRepository;
             _fileRepository = fileRepository;
             _mapper = mapper;
             _jwtService = jwtService;
+            _mediaRepository = mediaRepository;
+            _artistRepository = artistRepository;
         }
 
         /// <summary>
@@ -199,6 +206,33 @@ namespace Nava.Presentation.Controllers.v2
 
             if (user.Roles.Contains(Role.Admin))
                 return BadRequest("کاربر مدیر نمی تواند حذف شود!");
+
+            var followingSingers = _artistRepository.FilterBy(a =>
+                a.Followers.Contains(user.Id)).ToList();
+
+            foreach (var followingSinger in followingSingers)
+            {
+                followingSinger.Followers.Remove(user.Id);
+                await _artistRepository.ReplaceOneAsync(followingSinger);
+            }
+
+            var likedMusics = _mediaRepository.FilterBy(a =>
+                a.LikedUsers.Contains(user.Id)).ToList();
+
+            foreach (var likedMusic in likedMusics)
+            {
+                likedMusic.LikedUsers.Remove(user.Id);
+                await _mediaRepository.ReplaceOneAsync(likedMusic);
+            }
+
+            var visitedMusics = _mediaRepository.FilterBy(a =>
+                a.VisitedUsers.Contains(user.Id)).ToList();
+
+            foreach (var visitedMusic in visitedMusics)
+            {
+                visitedMusic.VisitedUsers.Remove(user.Id);
+                await _mediaRepository.ReplaceOneAsync(visitedMusic);
+            }
 
             _fileRepository.DeleteFile(Path.Combine(UserAvatarPath, user.AvatarPath ?? ""));
             await _userRepository.DeleteByIdAsync(id);

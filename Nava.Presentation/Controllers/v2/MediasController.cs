@@ -22,15 +22,17 @@ namespace Nava.Presentation.Controllers.v2
     {
         private readonly IMongoRepository<Album> _albumRepository;
         private readonly IMongoRepository<Media> _mediaRepository;
+        private readonly IMongoRepository<User> _userRepository;
         private readonly IMapper _mapper;
         private readonly IFileRepository _fileRepository;
         private const string MediaArtworkPath = "wwwroot\\media_avatars";
         private const string MediaFilePath = "wwwroot\\media_files";
 
-        public MediasController(IMongoRepository<Album> albumRepository, IMongoRepository<Media> mediaRepository, IMapper mapper, IFileRepository fileRepository)
+        public MediasController(IMongoRepository<Album> albumRepository, IMongoRepository<Media> mediaRepository, IMongoRepository<User> userRepository, IMapper mapper, IFileRepository fileRepository)
         {
             _albumRepository = albumRepository;
             _mediaRepository = mediaRepository;
+            _userRepository = userRepository;
             _mapper = mapper;
             _fileRepository = fileRepository;
         }
@@ -111,6 +113,26 @@ namespace Nava.Presentation.Controllers.v2
 
             relatedAlbum.Medias.Remove(media.Id);
             await _albumRepository.ReplaceOneAsync(relatedAlbum);
+
+            var likedUsers = _userRepository.FilterBy(a => a.LikedMedias.Contains(media.Id)).ToList();
+            if (likedUsers.Any())
+            {
+                foreach (var user in likedUsers)
+                {
+                    user.LikedMedias.Remove(media.Id);
+                    await _userRepository.ReplaceOneAsync(user);
+                }
+            }
+
+            var visitedUsers = _userRepository.FilterBy(a => a.VisitedMedias.Contains(media.Id)).ToList();
+            if (visitedUsers.Any())
+            {
+                foreach (var user in visitedUsers)
+                {
+                    user.VisitedMedias.Remove(media.Id);
+                    await _userRepository.ReplaceOneAsync(user);
+                }
+            }
 
             await _mediaRepository.DeleteByIdAsync(media.Id.ToString());
 

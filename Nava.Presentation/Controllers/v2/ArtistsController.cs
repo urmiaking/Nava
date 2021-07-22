@@ -110,8 +110,8 @@ namespace Nava.Presentation.Controllers.v2
             if (artist.Albums.Any())
                 return BadRequest("آلبوم های هنرمند خالی نمی باشد.");
 
-            //TODO: delete followers
-            var followers = _userRepository.FilterBy(a => a.FollowingArtists.Contains(artist.Id)).ToList();
+            var followers = _userRepository.FilterBy(a => 
+                a.FollowingArtists.Contains(artist.Id)).ToList();
 
             foreach (var follower in followers)
             {
