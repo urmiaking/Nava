@@ -20,15 +20,18 @@ namespace Nava.Presentation.Controllers.v2
     public class ArtistsController : BaseController
     {
         private readonly IMongoRepository<Artist> _artistRepository;
+        private readonly IMongoRepository<User> _userRepository;
+
         private readonly IFileRepository _fileRepository;
         private readonly IMapper _mapper;
         private const string ArtistsAvatarPath = "wwwroot\\artists_avatars";
 
-        public ArtistsController(IMongoRepository<Artist> artistRepository, IFileRepository fileRepository, IMapper mapper)
+        public ArtistsController(IMongoRepository<Artist> artistRepository, IFileRepository fileRepository, IMapper mapper, IMongoRepository<User> userRepository)
         {
             _artistRepository = artistRepository;
             _fileRepository = fileRepository;
             _mapper = mapper;
+            _userRepository = userRepository;
         }
 
         [HttpGet]
@@ -106,6 +109,15 @@ namespace Nava.Presentation.Controllers.v2
 
             if (artist.Albums.Any())
                 return BadRequest("آلبوم های هنرمند خالی نمی باشد.");
+
+            //TODO: delete followers
+            var followers = _userRepository.FilterBy(a => a.FollowingArtists.Contains(artist.Id)).ToList();
+
+            foreach (var follower in followers)
+            {
+                follower.FollowingArtists.Remove(artist.Id);
+                await _userRepository.ReplaceOneAsync(follower);
+            }
 
             _fileRepository.DeleteFile(Path.Combine(ArtistsAvatarPath, artist.AvatarPath));
 
