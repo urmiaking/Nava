@@ -131,6 +131,9 @@ namespace Nava.Presentation.Controllers.v1
                 if (!User.IsInRole(Role.Admin))
                     return Forbid();
 
+            if (!await _userRepository.TableNoTracking.AnyAsync(a => a.Id.Equals(userId), cancellationToken))
+                return NotFound();
+
             var followings = await _followingRepository.TableNoTracking
                 .Include(a => a.Artist)
                 .Where(a => a.UserId.Equals(userId))
@@ -154,6 +157,9 @@ namespace Nava.Presentation.Controllers.v1
         [Authorize(Roles = Role.Admin, AuthenticationSchemes = "Bearer")]
         public async Task<ApiResult<List<UserResultDto>>> GetFollowers(int artistId, CancellationToken cancellationToken)
         {
+            if (!await _artistRepository.TableNoTracking.AnyAsync(a => a.Id.Equals(artistId), cancellationToken))
+                return NotFound();
+            
             var followers = await _followingRepository.TableNoTracking
                 .Include(a => a.User)
                 .Where(a => a.ArtistId.Equals(artistId))
